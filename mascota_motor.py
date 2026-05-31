@@ -8,9 +8,15 @@ import random
 import os
 import json
 import math
+from dotenv import load_dotenv
 
-# Inicialización de la API
-API_KEY = "AQ.Ab8RN6KjrA7ymL7g1oHmFxI9takvvfA0SogcncLqw4FOTsVEjw" 
+# Cargar variables de entorno
+load_dotenv()
+API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not API_KEY:
+    raise ValueError("⚠️ GEMINI_API_KEY no encontrada en .env. Por favor, configúrala en el archivo .env")
+
 client = genai.Client(api_key=API_KEY)
 
 class MascotaLogica:
@@ -268,7 +274,8 @@ class MascotaLogica:
             )
             texto = response.text.strip().replace('"', '')
             self.window.after(0, lambda: self.globo_lbl.config(text=texto))
-        except:
+        except Exception as e:
+            print(f"❌ Error en IA: {e}")
             self.window.after(0, lambda: self.globo_lbl.config(text="Error..."))
 
     def bucle_monitoreo_ia(self):
@@ -285,8 +292,8 @@ class MascotaLogica:
                     )
                     texto = response.text.strip().replace('"', '')
                     self.window.after(0, lambda: self.mostrar_comentario_autonomo(texto))
-                except: 
-                    pass
+                except Exception as e:
+                    print(f"❌ Error monitoreo IA: {e}")
 
     def mostrar_comentario_autonomo(self, texto):
         if not self.chat_abierto:
@@ -302,4 +309,3 @@ class MascotaLogica:
 
 if __name__ == "__main__":
     pass
-
