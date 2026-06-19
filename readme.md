@@ -2,6 +2,12 @@
 
 Aplicación de mascotas interactivas en el escritorio con inteligencia artificial. Las mascotas pueden caminar, saludar, interactuar entre sí y mantener conversaciones usando Gemini, OpenAI u OpenRouter.
 
+### Personajes incluidos
+
+| Gojo Satoru | Rias Gremory | Naruto Uzumaki |
+|:-----------:|:------------:|:---------------:|
+| ![Gojo](assets/gojo_card.png) | ![Rias](assets/rias_card.png) | ![Naruto](assets/naruto_card.png) |
+
 ## Requisitos
 
 - Python 3.10 o superior
@@ -56,15 +62,7 @@ Se abre un launcher con la lista de personajes disponibles. Seleccioná uno y pr
 - **+ AGREGAR PERSONAJE** – añadir un nuevo personaje (carpeta + config.json)
 - **CONFIGURACION** – ajustar monitoreo IA, partículas, sonido, transparencia y velocidad
 
-## Personajes incluidos
-
-| Personaje | Imágenes | Descripción |
-|-----------|----------|-------------|
-| Rias Gremory | 3 (quieto, caminando, saludo) | La Reina del Consejo Estudiantil |
-| Gojo Satoru | 3 (quieto, caminando, saludo) | El Hechicero más Fuerte |
-| Naruto Uzumaki | 1 | El ninja más ruidoso de Konoha |
-
-### Agregar personajes personalizados
+## Agregar personajes personalizados
 
 1. Crear una carpeta dentro de `personajes/`
 2. Agregar un `config.json` con este formato:
