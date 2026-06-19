@@ -16,12 +16,16 @@ except Exception:
 
 import sound_manager
 import settings_manager
-from dotenv import load_dotenv, set_key
+from dotenv import load_dotenv
+
+
+def _base():
+    return os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
 
 
 class LauncherPremiumAnime:
     def __init__(self):
-        load_dotenv()
+        load_dotenv(dotenv_path=os.path.join(_base(), ".env"))
         if not self._verificar_api_key():
             return
         self.mascotas_activas = {}
@@ -38,7 +42,7 @@ class LauncherPremiumAnime:
         self.root.protocol("WM_DELETE_WINDOW", self.on_cerrar)
 
         try:
-            ruta_icono = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app_icon.ico")
+            ruta_icono = os.path.join(_base(), "app_icon.ico")
             if os.path.exists(ruta_icono):
                 self.root.iconbitmap(ruta_icono)
         except Exception:
@@ -47,14 +51,14 @@ class LauncherPremiumAnime:
         self._build_ui()
         self.root.update_idletasks()
 
-        # Carga perezosa: no bloquear el startup
-        self.root.after(10, self._carga_tardia)
+        # Carga perezosa: sonidos en hilo, personajes + tray despues de mostrar ventana
+        threading.Thread(target=sound_manager.asegurar_sonidos, daemon=True).start()
+        self.root.after(50, self._carga_tardia)
+        self.root.mainloop()
 
     def _carga_tardia(self):
-        threading.Thread(target=sound_manager.asegurar_sonidos, daemon=True).start()
         self.escanear_personajes()
         self.iniciar_tray_icon()
-        self.root.mainloop()
 
     def _verificar_api_key(self):
         proveedores = {"gemini": "GEMINI_API_KEY", "openai": "OPENAI_API_KEY", "openrouter": "OPENROUTER_API_KEY"}
@@ -114,7 +118,7 @@ class LauncherPremiumAnime:
                 tk.messagebox.showwarning("Error", "Ingresa una API key valida.")
                 return
             env_vars = {"gemini": "GEMINI_API_KEY", "openai": "OPENAI_API_KEY", "openrouter": "OPENROUTER_API_KEY"}
-            env_path = os.path.join(os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__)), ".env")
+            env_path = os.path.join(_base(), ".env")
             with open(env_path, "a", encoding="utf-8") as f:
                 f.write(f"\nAI_PROVIDER={provider}\n{env_vars[provider]}={key}\n")
             tk.messagebox.showinfo("Listo", "API key guardada. Reinicia la aplicacion.")
@@ -229,7 +233,7 @@ class LauncherPremiumAnime:
             w.destroy()
         self.cards.clear()
         self.card_thumbs.clear()
-        ruta = "personajes"
+        ruta = os.path.join(_base(), "personajes")
         if not os.path.exists(ruta):
             os.makedirs(ruta)
         for carpeta in sorted(os.listdir(ruta)):
@@ -398,7 +402,7 @@ class LauncherPremiumAnime:
             import pystray
             from pystray import MenuItem as Item
 
-            img_tray = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "app_icon.ico")).resize((64, 64))
+            img_tray = Image.open(os.path.join(_base(), "app_icon.ico")).resize((64, 64))
             icono = pystray.Icon("shimeji", img_tray, "Shimeji Nexus", menu=pystray.Menu(
                 Item("Mostrar Ventana", lambda: self.root.after(0, self.root.deiconify)),
                 Item("Salir", lambda: self.root.after(0, self.salir_completo)),
