@@ -42,3 +42,15 @@ Thumbs.db
 # Temp files
 temp_invisible.ico
 *.tmp
+
+# Cache de posiciones de mascotas
+pos_cache/
+
+# Cache de configuracion
+settings_cache.json
+
+# Estado compartido entre mascotas (IPC)
+shared_state/
+
+# PyInstaller
+*.spec
