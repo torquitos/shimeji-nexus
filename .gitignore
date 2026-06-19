@@ -42,6 +42,7 @@ Thumbs.db
 # Temp files
 temp_invisible.ico
 *.tmp
+debug.log
 
 # Cache de posiciones de mascotas
 pos_cache/

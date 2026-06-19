@@ -1,177 +1,103 @@
-<p align="center">
-  <img src="personajes/Rias/rias.png" width="80">
-  <img src="personajes/Gojo/quieto.png" width="80">
-  <img src="personajes/naruto/naruto.png" width="80">
-</p>
+# Shimeji Nexus - Mascotas de escritorio con IA
 
-<h1 align="center">SHIMEJI NEXUS</h1>
-<p align="center">Mascotas virtuales de escritorio con inteligencia artificial</p>
+Aplicación de mascotas interactivas en el escritorio con inteligencia artificial. Las mascotas pueden caminar, saludar, interactuar entre sí y mantener conversaciones usando Gemini, OpenAI u OpenRouter.
 
-<p align="center">
-  <b>Python</b> + <b>Google Gemini</b> + <b>Tkinter</b>
-</p>
+## Requisitos
 
----
+- Python 3.10 o superior
+- Windows (usa `pygetwindow` para posicionamiento en pantalla)
 
-## Personajes incluidos
-
-<p align="center">
-  <table>
-    <tr>
-      <td align="center"><img src="personajes/Rias/rias.png" width="100"><br><b>Rias Gremory</b><br><sub>High School DxD</sub></td>
-      <td align="center"><img src="personajes/Gojo/quieto.png" width="100"><br><b>Gojo Satoru</b><br><sub>Jujutsu Kaisen</sub></td>
-      <td align="center"><img src="personajes/naruto/naruto.png" width="100"><br><b>Naruto Uzumaki</b><br><sub>Naruto Shippuden</sub></td>
-    </tr>
-  </table>
-</p>
-
----
-
-## Caracteristicas
-
-| | |
-|---|---|
-| **Multiples mascotas** | Varias en pantalla al mismo tiempo, interactuando entre si |
-| **IA integrada** | Cada mascota comenta lo que haces en tu PC y puede chatear contigo |
-| **Interaccion entre ellas** | Se saludan, bailan, se siguen y chocan entre si |
-| **Animaciones por estado** | Cada personaje puede tener 3 imagenes: quieto, caminando, saludo |
-| **Sonidos** | Efectos al invocar, cerrar, saludar y usar magia |
-| **Panel de configuracion** | Transparencia, velocidad, particulas, monitoreo IA |
-| **Bandeja de sistema** | La app se minimiza a la bandeja de Windows |
-| **Agregar personajes** | Desde el launcher sin editar archivos |
-| **Persistencia** | Las mascotas recuerdan su posicion al cerrarse |
-
----
-
-## Descarga rapida (ejecutable)
-
-```
-1. Descarga ShimejiNexus.exe
-2. Colocalo en una carpeta junto a personajes/ y assets/
-3. Crea un archivo .env con tu API key
-4. Ejecuta ShimejiNexus.exe
-```
-
-### Obtener API Key (gratis)
-
-```
-1. Ve a https://aistudio.google.com/apikey
-2. Inicia sesion con tu cuenta de Google
-3. Genera una API Key
-4. Crea un archivo .env en la misma carpeta que el .exe con:
-```
-
-```env
-GEMINI_API_KEY=tu_api_key_aqui
-```
-
----
-
-## Como usar
-
-<p align="center">
-  <img src="personajes/Rias/rias.png" width="120" align="left" hspace="10">
-  <b>1. Abre el launcher</b><br>
-  Se mostrara la lista de personajes disponibles a la izquierda.<br><br>
-  <b>2. Selecciona un personaje</b><br>
-  Haz clic en su tarjeta para ver su informacion y previsualizacion.<br><br>
-  <b>3. Invocalo en pantalla</b><br>
-  Presiona el boton rosa y la mascota aparecera en tu escritorio.
-</p>
-
-<br clear="all">
-
-### Controles de mascota
-
-| Accion | Resultado |
-|---|---|
-| Clic izquierdo + arrastrar | Mueve la mascota |
-| Clic derecho | Menu contextual (chat, magia, cerrar) |
-| Escribir en el chat + Enter | Hablar con la IA |
-| Btn INVOCAR | La mascota aparece en pantalla |
-| Btn CERRAR ESTA MASCOTA | Cierra la mascota seleccionada |
-| Btn CERRAR TODAS | Cierra todas las mascotas |
-
----
-
-## Agregar nuevos personajes
-
-### Desde el launcher (recomendado)
-
-Haz clic en **+ AGREGAR PERSONAJE** y completa:
-
-1. **Nombre** del personaje
-2. **Anime** de origen (opcional)
-3. **Imagen Quieto** (obligatorio, formato PNG)
-4. **Imagen Caminando** (opcional)
-5. **Imagen Saludo** (opcional)
-6. **Personalidad** para la IA (se autogenera si la dejas vacia)
-
-### Manualmente
-
-Crea una carpeta en `personajes/` con esta estructura:
-
-```
-personajes/
-  MiPersonaje/
-    quieto.png
-    caminando.png   (opcional)
-    saludo.png      (opcional)
-    config.json
-```
-
-```json
-{
-    "nombre": "Mi Personaje",
-    "personalidad": "Instrucciones de personalidad para la IA",
-    "frames": {
-        "quieto": "quieto.png",
-        "caminando": "caminando.png",
-        "saludo": "saludo.png"
-    },
-    "imagen": "quieto.png",
-    "saludo": "¡Hola! Soy Mi Personaje~"
-}
-```
-
-Si solo tienes una imagen, omite `frames` y usa solo `imagen`.
-
----
-
-## Requisitos (ejecutar desde codigo fuente)
+## Instalación
 
 ```bash
-pip install pillow google-genai pygetwindow python-dotenv pystray pygame psutil
+# Clonar o copiar la carpeta, luego instalar dependencias
+pip install -r requirements.txt
 ```
+
+## Configuración de API (obligatorio para IA)
+
+Crear un archivo `.env` en la raíz del proyecto con al menos una de estas claves:
+
+```env
+# Proveedor por defecto (gemini, openai, openrouter)
+AI_PROVIDER=gemini
+
+# Tu API key según el proveedor que uses
+GEMINI_API_KEY=tu_clave_aqui
+# OPENAI_API_KEY=tu_clave_aqui
+# OPENROUTER_API_KEY=tu_clave_aqui
+```
+
+- **Gemini**: obtener en https://aistudio.google.com/apikey
+- **OpenAI**: obtener en https://platform.openai.com/api-keys
+- **OpenRouter**: obtener en https://openrouter.ai/keys
+
+> `AI_PROVIDER` por defecto es `gemini`. Si usás otro, cambiá el valor y asegurate de tener la key correspondiente.
+
+## Cómo ejecutar
 
 ```bash
 python app_principal.py
 ```
 
----
+Se abre un launcher con la lista de personajes disponibles. Seleccioná uno y presioná **INVOCAR EN PANTALLA**.
+
+## Capturas
+
+| Launcher | Mascota en pantalla |
+|----------|---------------------|
+| ![Launcher](assets/screenshot_launcher.png) | ![Mascota](assets/screenshot_mascota.png) |
+
+## Controles
+
+- **INVOCAR EN PANTALLA** – abre la mascota flotante sobre el escritorio
+- **CERRAR ESTA MASCOTA** – cierra la mascota seleccionada
+- **CERRAR TODAS LAS MASCOTAS** – termina todos los procesos
+- **+ AGREGAR PERSONAJE** – añadir un nuevo personaje (carpeta + config.json)
+- **CONFIGURACION** – ajustar monitoreo IA, partículas, sonido, transparencia y velocidad
+
+## Personajes incluidos
+
+| Personaje | Imágenes | Descripción |
+|-----------|----------|-------------|
+| Rias Gremory | 3 (quieto, caminando, saludo) | La Reina del Consejo Estudiantil |
+| Gojo Satoru | 3 (quieto, caminando, saludo) | El Hechicero más Fuerte |
+| Naruto Uzumaki | 1 | El ninja más ruidoso de Konoha |
+
+### Agregar personajes personalizados
+
+1. Crear una carpeta dentro de `personajes/`
+2. Agregar un `config.json` con este formato:
+   ```json
+   {
+     "nombre": "Mi Personaje",
+     "personalidad": "Descripción de su personalidad...",
+     "imagen": "mi_imagen.png"
+   }
+   ```
+3. Colocar las imágenes (PNG con fondo blanco para transparencia automática)
+   - Una sola imagen: se usa para quieto, caminando y saludo
+   - Tres imágenes: `{nombre}_quieto.png`, `{nombre}_caminando.png`, `{nombre}_saludo.png`
+
+## Notas
+
+- El icono de bandeja (tray icon) es opcional (`pystray`). Si no está instalado, se omite silenciosamente.
+- Los sonidos se generan automáticamente al iniciar (WAV sintetizados vía `sound_manager.py`).
+- `.env` está en `.gitignore` — las claves API nunca se suben al repositorio.
+- No se distribuye como `.exe` (Windows Defender bloquea PyInstaller). Se ejecuta siempre desde código fuente.
 
 ## Estructura del proyecto
 
 ```
-ShimejiNexus/
-  app_principal.py     # Launcher principal
-  mascota_motor.py     # Motor grafico de mascotas
-  sound_manager.py     # Generacion y reproduccion de sonidos
-  settings_manager.py  # Configuracion persistente
-  personajes/          # Carpeta de personajes
-    Rias/
-    Gojo/
-    naruto/
-  assets/sounds/       # Efectos de sonido
-  pos_cache/           # Posiciones guardadas
-  shared_state/        # Comunicacion entre mascotas
+Mascotas/
+├── app_principal.py       # Launcher con lista de personajes
+├── mascota_motor.py       # Motor de la mascota flotante
+├── ai_manager.py          # Abstracción multi-provider (Gemini/OpenAI/OpenRouter)
+├── sound_manager.py       # Generación y reproducción de sonidos
+├── settings_manager.py    # Persistencia de configuración
+├── requirements.txt       # Dependencias
+├── personajes/            # Carpetas de personajes (Gojo, Rias, naruto/)
+├── assets/sounds/         # Archivos de sonido generados
+├── shared_state/          # Estado compartido para interacción entre mascotas
+└── .env                   # Configuración de API keys (no se sube a git)
 ```
-
----
-
-## Notas
-
-- Las mascotas se comunican entre si a traves de archivos JSON en `shared_state/`
-- Si cierras el launcher, las mascotas siguen activas. Usa "CERRAR TODAS" para limpiarlas
-- Para cambiar la personalidad de un personaje, edita su `config.json`
-- Los sonidos se generan automaticamente en la primera ejecucion
