@@ -12,6 +12,11 @@ import signal
 import settings_manager
 import ai_manager
 
+try:
+    import ctypes
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("ShimejiNexus.Mascota.v3")
+except Exception:
+    pass
 
 def _base():
     return os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
@@ -32,6 +37,12 @@ class MascotaLogica:
         self.window.wm_attributes("-transparentcolor", "black")
         self.window.attributes("-topmost", True)
         self.window.protocol("WM_DELETE_WINDOW", self.salir)
+        try:
+            ruta_ico = os.path.join(_base(), "app_icon.ico")
+            if os.path.exists(ruta_ico):
+                self.window.iconbitmap(ruta_ico)
+        except Exception:
+            pass
 
         self.tamano = 200
         self.frames_cache = self._cargar_frames(ruta_personaje)

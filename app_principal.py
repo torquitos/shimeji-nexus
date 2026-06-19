@@ -39,10 +39,9 @@ class LauncherPremiumAnime:
         self.root.protocol("WM_DELETE_WINDOW", self.on_cerrar)
 
         try:
-            img_invisible = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-            ruta_icono = "temp_invisible.ico"
-            img_invisible.save(ruta_icono, format="ICO")
-            self.root.iconbitmap(ruta_icono)
+            ruta_icono = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app_icon.ico")
+            if os.path.exists(ruta_icono):
+                self.root.iconbitmap(ruta_icono)
         except Exception:
             pass
 
@@ -389,7 +388,7 @@ class LauncherPremiumAnime:
             import pystray
             from pystray import MenuItem as Item
 
-            img_tray = Image.new("RGBA", (64, 64), (255, 51, 102, 255))
+            img_tray = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "app_icon.ico")).resize((64, 64))
             icono = pystray.Icon("shimeji", img_tray, "Shimeji Nexus", menu=pystray.Menu(
                 Item("Mostrar Ventana", lambda: self.root.after(0, self.root.deiconify)),
                 Item("Salir", lambda: self.root.after(0, self.salir_completo)),
