@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import messagebox
 from PIL import Image, ImageTk
 import os
 import subprocess
@@ -26,8 +26,6 @@ def _base():
 class LauncherPremiumAnime:
     def __init__(self):
         load_dotenv(dotenv_path=os.path.join(_base(), ".env"))
-        if not self._verificar_api_key():
-            return
         self.mascotas_activas = {}
         self.personajes_datos = {}
         self.personaje_seleccionado = None
@@ -59,77 +57,6 @@ class LauncherPremiumAnime:
     def _carga_tardia(self):
         self.escanear_personajes()
         self.iniciar_tray_icon()
-
-    def _verificar_api_key(self):
-        proveedores = {"gemini": "GEMINI_API_KEY", "openai": "OPENAI_API_KEY", "openrouter": "OPENROUTER_API_KEY"}
-        for prov, var in proveedores.items():
-            if os.getenv(var):
-                return True
-        self._mostrar_setup_api()
-        return False
-
-    def _mostrar_setup_api(self):
-        win = tk.Toplevel(self.root) if hasattr(self, "root") else None
-        if not win:
-            self.root = tk.Tk()
-            self.root.withdraw()
-            win = tk.Toplevel(self.root)
-        win.title("Configuracion Inicial")
-        win.geometry("480x400")
-        win.configure(bg="#0F0F12")
-        win.resizable(False, False)
-        win.grab_set()
-
-        tk.Label(win, text="BIENVENIDO A SHIMEJI NEXUS", fg="#FF3366", bg="#0F0F12", font=("Segoe UI", 13, "bold")).pack(pady=(20, 5))
-        tk.Label(win, text="Configura tu inteligencia artificial", fg="#8C8C9A", bg="#0F0F12", font=("Segoe UI", 10)).pack(pady=(0, 15))
-
-        frame = tk.Frame(win, bg="#0F0F12")
-        frame.pack(padx=25, fill="both", expand=True)
-
-        tk.Label(frame, text="Proveedor de IA:", fg="#E1E1E6", bg="#0F0F12", font=("Segoe UI", 10)).pack(anchor="w")
-        self._var_provider = tk.StringVar(value="gemini")
-        prov_menu = ttk.Combobox(frame, textvariable=self._var_provider, values=["gemini", "openai", "openrouter"], state="readonly", font=("Segoe UI", 10))
-        prov_menu.pack(fill="x", pady=(3, 12))
-
-        tk.Label(frame, text="API Key:", fg="#E1E1E6", bg="#0F0F12", font=("Segoe UI", 10)).pack(anchor="w")
-        self._entry_key = tk.Entry(frame, bg="#24242D", fg="white", bd=0, insertbackground="white", font=("Segoe UI", 10), highlightthickness=1, highlightbackground="#FF3366")
-        self._entry_key.pack(fill="x", pady=(3, 5), ipady=6)
-
-        tk.Label(frame, text="La API key se guardara en el archivo .env", fg="#5A5A6A", bg="#0F0F12", font=("Segoe UI", 8)).pack(anchor="w", pady=(0, 15))
-
-        def actualizar_placeholder(*_):
-            hints = {"gemini": "AIza...", "openai": "sk-...", "openrouter": "sk-or-..."}
-            self._entry_key.delete(0, tk.END)
-            self._entry_key.insert(0, hints.get(self._var_provider.get(), ""))
-            self._entry_key.config(fg="#5A5A6A")
-        prov_menu.bind("<<ComboboxSelected>>", actualizar_placeholder)
-        actualizar_placeholder()
-
-        def on_click_entry(event):
-            if self._entry_key.get() in ["AIza...", "sk-...", "sk-or-..."]:
-                self._entry_key.delete(0, tk.END)
-                self._entry_key.config(fg="white")
-        self._entry_key.bind("<FocusIn>", on_click_entry)
-
-        def guardar():
-            provider = self._var_provider.get()
-            key = self._entry_key.get().strip()
-            if not key or key in ["AIza...", "sk-...", "sk-or-..."]:
-                tk.messagebox.showwarning("Error", "Ingresa una API key valida.")
-                return
-            env_vars = {"gemini": "GEMINI_API_KEY", "openai": "OPENAI_API_KEY", "openrouter": "OPENROUTER_API_KEY"}
-            env_path = os.path.join(_base(), ".env")
-            with open(env_path, "a", encoding="utf-8") as f:
-                f.write(f"\nAI_PROVIDER={provider}\n{env_vars[provider]}={key}\n")
-            tk.messagebox.showinfo("Listo", "API key guardada. Reinicia la aplicacion.")
-            win.destroy()
-            if hasattr(self, "root"):
-                self.root.quit()
-                self.root.destroy()
-            os._exit(0)
-
-        tk.Button(frame, text="GUARDAR CONFIGURACION", bg="#FF3366", fg="white", font=("Segoe UI", 11, "bold"), bd=0, command=guardar, activebackground="#E62E5C", activeforeground="white", relief="flat").pack(pady=(10, 5), ipady=8, fill="x")
-        win.wait_window()
 
     def _estilizar_boton(self, btn, color_normal, color_hover, color_text="#FFFFFF"):
         btn.bind("<Enter>", lambda e: btn.config(bg=color_hover, relief="raised"))
