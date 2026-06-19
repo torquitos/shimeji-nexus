@@ -49,16 +49,29 @@ class LauncherPremiumAnime:
         self._build_ui()
         self.root.update()
 
-        # Carga perezosa: sonidos en hilo, personajes + tray despues de mostrar ventana
-        threading.Thread(target=sound_manager.asegurar_sonidos, daemon=True).start()
-        self.root.after(200, self._carga_tardia)
-        self.root.mainloop()
-
-    def _carga_tardia(self):
+        # Carga inmediata (no lazy)
         try:
             self.escanear_personajes()
         except Exception as e:
-            print(f"Error escaneando personajes: {e}")
+            import traceback
+            traceback.print_exc()
+            try:
+                messagebox.showerror("Error Personajes",
+                    f"Error al cargar personajes:\n{e}\n\n"
+                    f"Revisa que la carpeta 'personajes' exista\n"
+                    f"con subcarpetas y config.json dentro")
+            except Exception:
+                pass
+
+        threading.Thread(target=sound_manager.asegurar_sonidos, daemon=True).start()
+        self.root.after(100, self._iniciar_tray)
+        self.root.mainloop()
+
+    def _iniciar_tray(self):
+        try:
+            self.iniciar_tray_icon()
+        except Exception:
+            pass
         try:
             self.iniciar_tray_icon()
         except Exception as e:
