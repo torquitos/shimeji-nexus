@@ -21,7 +21,6 @@ from dotenv import load_dotenv, set_key
 
 class LauncherPremiumAnime:
     def __init__(self):
-        sound_manager.asegurar_sonidos()
         load_dotenv()
         if not self._verificar_api_key():
             return
@@ -46,6 +45,13 @@ class LauncherPremiumAnime:
             pass
 
         self._build_ui()
+        self.root.update_idletasks()
+
+        # Carga perezosa: no bloquear el startup
+        self.root.after(10, self._carga_tardia)
+
+    def _carga_tardia(self):
+        threading.Thread(target=sound_manager.asegurar_sonidos, daemon=True).start()
         self.escanear_personajes()
         self.iniciar_tray_icon()
         self.root.mainloop()
@@ -118,12 +124,14 @@ class LauncherPremiumAnime:
                 self.root.destroy()
             os._exit(0)
 
-        tk.Button(frame, text="GUARDAR CONFIGURACION", bg="#FF3366", fg="white", font=("Segoe UI", 11, "bold"), bd=0, cursor="hand2", command=guardar).pack(pady=(10, 5), ipady=8, fill="x")
+        tk.Button(frame, text="GUARDAR CONFIGURACION", bg="#FF3366", fg="white", font=("Segoe UI", 11, "bold"), bd=0, command=guardar, activebackground="#E62E5C", activeforeground="white", relief="flat").pack(pady=(10, 5), ipady=8, fill="x")
         win.wait_window()
 
     def _estilizar_boton(self, btn, color_normal, color_hover, color_text="#FFFFFF"):
-        btn.bind("<Enter>", lambda e: btn.config(bg=color_hover))
-        btn.bind("<Leave>", lambda e: btn.config(bg=color_normal))
+        btn.bind("<Enter>", lambda e: btn.config(bg=color_hover, relief="raised"))
+        btn.bind("<Leave>", lambda e: btn.config(bg=color_normal, relief="flat"))
+        btn.bind("<ButtonPress-1>", lambda e: btn.config(relief="sunken"))
+        btn.bind("<ButtonRelease-1>", lambda e: btn.config(relief="raised"))
 
     def _build_ui(self):
         # PANEL IZQUIERDO - Lista de personajes con tarjetas
@@ -178,21 +186,21 @@ class LauncherPremiumAnime:
         self.frame_botones.pack(side="bottom", fill="x", padx=15, pady=(0, 12))
 
         btns = [
-            ("INVOCAR EN PANTALLA", "#FF3366", "#E62E5C", self.lanzar, "disabled", True, 8),
+            ("INVOCAR EN PANTALLA", "#FF3366", "#E62E5C", self.lanzar, "disabled", True, 10),
             ("CERRAR ESTA MASCOTA", "#29292E", "#3A3A42", self.cerrar_mascota_seleccionada, "disabled", True, 5),
             ("CERRAR TODAS LAS MASCOTAS", "#29292E", "#3A3A42", self.matar_todos, "normal", False, 5),
-            ("+ AGREGAR PERSONAJE", "#1A2E1A", "#2A4A2A", self.abrir_agregar, "normal", False, 4),
-            ("CONFIGURACION", "#1E1E24", "#2E2E34", self.abrir_settings, "normal", False, 4),
+            ("+ AGREGAR PERSONAJE", "#1A2E1A", "#2A4A2A", self.abrir_agregar, "normal", False, 5),
+            ("CONFIGURACION", "#1E1E24", "#2E2E34", self.abrir_settings, "normal", False, 5),
         ]
         for texto, color, hover, cmd, estado, es_principal, ipady in btns:
             fg = "white" if es_principal else ("#4CAF50" if texto.startswith("+") else "#8C8C9A")
-            btn = tk.Button(self.frame_botones, text=texto, bg=color, fg=fg, font=("Segoe UI", 10, "bold" if es_principal else "normal"), bd=0, cursor="hand2", command=cmd, state=estado, activebackground=hover, activeforeground="white")
-            btn.pack(fill="x", pady=3, ipady=ipady)
+            btn = tk.Button(self.frame_botones, text=texto, bg=color, fg=fg, font=("Segoe UI", 10, "bold" if es_principal else "normal"), bd=0, command=cmd, state=estado, activebackground=hover, activeforeground="white", relief="flat", padx=10)
+            btn.pack(fill="x", pady=2, ipady=ipady)
             self._estilizar_boton(btn, color, hover, fg)
             setattr(self, f"_btn_{texto.lower().replace(' ','_').replace('+','')}", btn)
 
     def _crear_card(self, parent, nombre, thumb):
-        card = tk.Frame(parent, bg="#1E1E24", bd=0, highlightbackground="#29292E", highlightthickness=1, cursor="hand2")
+        card = tk.Frame(parent, bg="#1E1E24", bd=0, highlightbackground="#29292E", highlightthickness=1)
         card.pack(fill="x", padx=4, pady=3)
         # Indicador de estado
         dot = tk.Canvas(card, width=10, height=10, bg="#1E1E24", bd=0, highlightthickness=0)
@@ -212,6 +220,8 @@ class LauncherPremiumAnime:
             widget.bind("<Button-1>", lambda e, n=nombre: self.seleccionar_personaje(n))
             widget.bind("<Enter>", lambda e, c=card: c.config(bg="#25252E", highlightbackground="#FF3366"))
             widget.bind("<Leave>", lambda e, c=card: c.config(bg="#1E1E24", highlightbackground="#29292E"))
+            widget.bind("<ButtonPress-1>", lambda e, c=card: c.config(highlightbackground="#E62E5C"))
+            widget.bind("<ButtonRelease-1>", lambda e, c=card: c.config(highlightbackground="#FF3366"))
         return card, dot, lbl
 
     def escanear_personajes(self):
@@ -457,7 +467,7 @@ class SettingsWindow:
         slider_v.pack(fill="x")
 
         # Botón guardar
-        tk.Button(main_frame, text="GUARDAR CONFIGURACION", bg="#FF3366", fg="white", font=("Segoe UI", 11, "bold"), bd=0, cursor="hand2", command=self.guardar).pack(pady=(20, 5), ipady=6, fill="x")
+        tk.Button(main_frame, text="GUARDAR CONFIGURACION", bg="#FF3366", fg="white", font=("Segoe UI", 11, "bold"), bd=0, command=self.guardar, activebackground="#E62E5C", activeforeground="white", relief="flat").pack(pady=(20, 5), ipady=6, fill="x")
 
     def _crear_check(self, parent, texto, variable):
         frame = tk.Frame(parent, bg="#0F0F12")
@@ -517,7 +527,7 @@ class AddCharacterWindow:
         self.text_pers.insert("1.0", "Actúa como [personaje] de [anime]. Eres un personaje amigable y carismático.")
 
         # Boton crear
-        tk.Button(main, text="CREAR PERSONAJE", bg="#4CAF50", fg="white", font=("Segoe UI", 11, "bold"), bd=0, cursor="hand2", command=self.crear).pack(ipady=6, fill="x")
+        tk.Button(main, text="CREAR PERSONAJE", bg="#4CAF50", fg="white", font=("Segoe UI", 11, "bold"), bd=0, command=self.crear, activebackground="#3D9140", activeforeground="white", relief="flat").pack(ipady=6, fill="x")
 
     def _crear_selector_img(self, parent, texto, key):
         f = tk.Frame(parent, bg="#0F0F12")
@@ -525,7 +535,7 @@ class AddCharacterWindow:
         tk.Label(f, text=texto, fg="#8C8C9A", bg="#0F0F12", font=("Segoe UI", 9), width=22, anchor="w").pack(side="left")
         self.rutas_img[key] = tk.StringVar()
         tk.Label(f, textvariable=self.rutas_img[key], fg="#E1E1E6", bg="#0F0F12", font=("Segoe UI", 8), width=30, anchor="w").pack(side="left", padx=5)
-        tk.Button(f, text="...", bg="#29292E", fg="white", bd=0, cursor="hand2", font=("Segoe UI", 8), command=lambda k=key: self._seleccionar(k)).pack(side="right")
+        tk.Button(f, text="...", bg="#29292E", fg="white", bd=0, font=("Segoe UI", 8), command=lambda k=key: self._seleccionar(k), relief="flat", padx=8).pack(side="right")
 
     def _seleccionar(self, key):
         from tkinter import filedialog
