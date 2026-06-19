@@ -52,7 +52,7 @@ Se abre un launcher con la lista de personajes disponibles. Seleccioná uno y pr
 
 | Launcher | Mascota en pantalla |
 |----------|---------------------|
-| ![Launcher](assets/screenshot_launcher.png) | ![Mascota](assets/screenshot_mascota.png) |
+| ![Launcher](assets/launcher.png) | ![Mascota](assets/mascotas.png) |
 
 ## Controles
 
