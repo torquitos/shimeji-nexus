@@ -47,16 +47,22 @@ class LauncherPremiumAnime:
             pass
 
         self._build_ui()
-        self.root.update_idletasks()
+        self.root.update()
 
         # Carga perezosa: sonidos en hilo, personajes + tray despues de mostrar ventana
         threading.Thread(target=sound_manager.asegurar_sonidos, daemon=True).start()
-        self.root.after(50, self._carga_tardia)
+        self.root.after(200, self._carga_tardia)
         self.root.mainloop()
 
     def _carga_tardia(self):
-        self.escanear_personajes()
-        self.iniciar_tray_icon()
+        try:
+            self.escanear_personajes()
+        except Exception as e:
+            print(f"Error escaneando personajes: {e}")
+        try:
+            self.iniciar_tray_icon()
+        except Exception as e:
+            print(f"Error tray icon: {e}")
 
     def _estilizar_boton(self, btn, color_normal, color_hover, color_text="#FFFFFF"):
         btn.bind("<Enter>", lambda e: btn.config(bg=color_hover, relief="raised"))
