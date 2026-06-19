@@ -298,7 +298,7 @@ class LauncherPremiumAnime:
             btn_cerrar.config(state="normal" if activa else "disabled")
         self.lbl_estado.config(text="● EN PANTALLA" if activa else "", fg="#4CAF50" if activa else "#0F0F12")
         # Preview grande
-        ruta_img = os.path.join("personajes", info["folder"], info["imagen"])
+        ruta_img = os.path.join(_base(), "personajes", info["folder"], info["imagen"])
         if os.path.exists(ruta_img):
             try:
                 img = Image.open(ruta_img).convert("RGBA")
@@ -332,11 +332,11 @@ class LauncherPremiumAnime:
             return
 
         folder = info["folder"]
-        ruta_envio = os.path.abspath(f"personajes/{folder}")
+        ruta_envio = os.path.join(_base(), "personajes", folder)
         sound_manager.reproducir("invoke")
 
         # Cargar posición guardada
-        pos_cache = os.path.join("pos_cache", f"{info['nombre']}.json")
+        pos_cache = os.path.join(_base(), "pos_cache", f"{info['nombre']}.json")
         pos_args = ""
         if os.path.exists(pos_cache):
             try:
@@ -351,7 +351,11 @@ class LauncherPremiumAnime:
         par = str(settings.get("particulas", True)).lower()
         extra_args = f"{mon},{par}"
 
-        proc = subprocess.Popen([sys.executable, "--mascota", ruta_envio, pos_args, extra_args])
+        args = [sys.executable]
+        if not getattr(sys, 'frozen', False):
+            args.append(__file__)
+        args.extend(["--mascota", ruta_envio, pos_args, extra_args])
+        proc = subprocess.Popen(args)
 
         self.mascotas_activas[item] = {"proceso": proc, "folder": folder}
         self.seleccionar_personaje(item)  # refresca UI
@@ -555,7 +559,7 @@ class AddCharacterWindow:
             messagebox.showwarning("Error", "El nombre es obligatorio.")
             return
         folder = re.sub(r"[^a-z0-9_]", "", nombre.lower().replace(" ", "_"))
-        ruta_pj = os.path.join("personajes", folder)
+        ruta_pj = os.path.join(_base(), "personajes", folder)
         if os.path.exists(ruta_pj):
             messagebox.showwarning("Error", "Ya existe un personaje con ese nombre.")
             return
