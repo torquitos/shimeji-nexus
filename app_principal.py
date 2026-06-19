@@ -353,12 +353,17 @@ class LauncherPremiumAnime:
 
         args = [sys.executable]
         if not getattr(sys, 'frozen', False):
-            args.append(__file__)
+            args.append(os.path.abspath(__file__))
         args.extend(["--mascota", ruta_envio, pos_args, extra_args])
-        proc = subprocess.Popen(args)
-
-        self.mascotas_activas[item] = {"proceso": proc, "folder": folder}
-        self.seleccionar_personaje(item)  # refresca UI
+        self.lbl_estado.config(text="● INVOCANDO...", fg="#FF9800")
+        self.root.update_idletasks()
+        try:
+            proc = subprocess.Popen(args)
+            self.mascotas_activas[item] = {"proceso": proc, "folder": folder}
+            self.seleccionar_personaje(item)
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo invocar a {item}:\n{e}")
+            self.lbl_estado.config(text="", fg="#0F0F12")
 
     def cerrar_mascota_seleccionada(self):
         if not self.personaje_seleccionado:
@@ -607,7 +612,11 @@ class AddCharacterWindow:
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--mascota":
-        from mascota_motor import MascotaLogica
+        try:
+            from mascota_motor import MascotaLogica
+        except ImportError as e:
+            print(f"Error importando mascota_motor: {e}")
+            sys.exit(1)
         import sound_manager
         sound_manager.asegurar_sonidos()
         ruta = sys.argv[2] if len(sys.argv) > 2 else None
@@ -626,6 +635,22 @@ if __name__ == "__main__":
             except Exception:
                 extra = {}
         if ruta:
-            MascotaLogica(ruta, pos, extra)
+            if not os.path.isdir(ruta):
+                print(f"ERROR: Ruta no valida: {ruta}")
+                sys.exit(1)
+            try:
+                MascotaLogica(ruta, pos, extra)
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                try:
+                    root = tk.Tk()
+                    root.withdraw()
+                    root.title("Error")
+                    tk.messagebox.showerror("Error Mascota", f"Error al cargar personaje:\n{e}")
+                    root.destroy()
+                except Exception:
+                    pass
+                sys.exit(1)
     else:
         LauncherPremiumAnime()
