@@ -75,15 +75,7 @@ class LauncherPremiumAnime:
         threading.Thread(target=sound_manager.asegurar_sonidos, daemon=True).start()
         print(f"DEBUG: {len(self.cards)} personajes cargados")
         print(f"DEBUG: Nombres: {list(self.cards.keys())}")
-        
-        # Asegurar que la ventana sea visible
-        self.root.deiconify()
-        self.root.lift()
-        self.root.attributes('-topmost', True)
-        self.root.after(500, lambda: self.root.attributes('-topmost', False))
-        
         self.root.after(100, self._iniciar_tray)
-        debug_log("DEBUG: Iniciando mainloop")
         self.root.mainloop()
 
     def _iniciar_tray(self):
@@ -98,49 +90,6 @@ class LauncherPremiumAnime:
         btn.bind("<ButtonPress-1>", lambda e: btn.config(relief="sunken"))
         btn.bind("<ButtonRelease-1>", lambda e: btn.config(relief="raised"))
 
-    def _procesar_clic_canvas(self, event):
-        """Redirigir clics del Canvas a los widgets dentro"""
-        x = self.canvas_lista.canvasx(event.x)
-        y = self.canvas_lista.canvasy(event.y)
-        widget_id = self.canvas_lista.find_overlapping(x, y, x, y)
-        if widget_id:
-            return "break"
-        return "continue"
-
-    def _canvas_clic(self, event):
-        """Procesar clic en el Canvas y determinar qué tarjeta fue clickeada"""
-        debug_log(f"DEBUG: Canvas recibió clic en ({event.x}, {event.y})")
-        
-        # Convertir coordenadas del Canvas
-        x = self.canvas_lista.canvasx(event.x)
-        y = self.canvas_lista.canvasy(event.y)
-        debug_log(f"DEBUG: Coordenadas en Canvas: ({x}, {y})")
-        
-        # Iterar sobre todas las tarjetas (cards)
-        for nombre, card_info in self.cards.items():
-            card_frame = card_info["frame"]
-            
-            # Obtener la posición de la tarjeta relativa al window del canvas
-            try:
-                # La tarjeta está en frame_cards
-                card_relativo_y = card_frame.winfo_y() if card_frame.winfo_y() != -1 else 0
-                card_relativo_x = card_frame.winfo_x() if card_frame.winfo_x() != -1 else 0
-                card_height = card_frame.winfo_height()
-                card_width = card_frame.winfo_width()
-                
-                # Las coordenadas en el canvas ya son relativas al frame_cards
-                if (0 <= x <= card_width and 
-                    card_relativo_y <= y <= card_relativo_y + card_height):
-                    debug_log(f"DEBUG: Clic en tarjeta '{nombre}'")
-                    self.seleccionar_personaje(nombre)
-                    return "break"
-            except Exception as e:
-                debug_log(f"DEBUG: Error procesando tarjeta '{nombre}': {e}")
-                continue
-        
-        debug_log(f"DEBUG: Clic no coincidió con ninguna tarjeta")
-        return "continue"
-
     def _build_ui(self):
         # PANEL IZQUIERDO - Lista de personajes con tarjetas
         self.panel_izq = tk.Frame(self.root, bg="#16161D", width=240)
@@ -154,14 +103,12 @@ class LauncherPremiumAnime:
         tk.Frame(header_frame, bg="#29292E", height=1).pack(fill="x", pady=(6, 0))
 
         # Canvas + Scrollbar para las tarjetas
-        self.canvas_lista = tk.Canvas(self.panel_izq, bg="#16161D", bd=0, highlightthickness=0, cursor="arrow")
+        self.canvas_lista = tk.Canvas(self.panel_izq, bg="#16161D", bd=0, highlightthickness=0)
         scrollbar = tk.Scrollbar(self.panel_izq, orient="vertical", command=self.canvas_lista.yview)
         self.frame_cards = tk.Frame(self.canvas_lista, bg="#16161D")
         self.frame_cards.bind("<Configure>", lambda e: self.canvas_lista.configure(scrollregion=self.canvas_lista.bbox("all")))
-        self.window_id = self.canvas_lista.create_window((0, 0), window=self.frame_cards, anchor="nw", width=220)
+        self.canvas_lista.create_window((0, 0), window=self.frame_cards, anchor="nw", width=220)
         self.canvas_lista.configure(yscrollcommand=scrollbar.set)
-        # Propagar el evento de Button-1 del Canvas a los widgets dentro
-        self.canvas_lista.bind("<Button-1>", self._canvas_clic)
         self.canvas_lista.pack(side="left", fill="both", expand=True, padx=(8, 0), pady=8)
         scrollbar.pack(side="right", fill="y", pady=8, padx=(0, 8))
 
@@ -232,30 +179,12 @@ class LauncherPremiumAnime:
         arrow = tk.Label(card, text=">", fg="#3A3A42", bg="#1E1E24", font=("Segoe UI", 10))
         arrow.pack(side="right", padx=(0, 10))
         # Eventos
-        def on_click(e, n=nombre):
-            debug_log(f"DEBUG: CLICK detectado en tarjeta de '{n}'")
-            try:
-                self.seleccionar_personaje(n)
-                debug_log(f"DEBUG: seleccionar_personaje('{n}') ejecutado exitosamente")
-            except Exception as ex:
-                debug_log(f"DEBUG: ERROR en seleccionar_personaje('{n}'): {ex}")
-                import traceback
-                debug_log(f"Traceback: {traceback.format_exc()}")
-        
         for widget in [card, lbl, arrow]:
-            widget.bind("<Button-1>", on_click)
+            widget.bind("<Button-1>", lambda e, n=nombre: self.seleccionar_personaje(n))
             widget.bind("<Enter>", lambda e, c=card: c.config(bg="#25252E", highlightbackground="#FF3366"))
             widget.bind("<Leave>", lambda e, c=card: c.config(bg="#1E1E24", highlightbackground="#29292E"))
             widget.bind("<ButtonPress-1>", lambda e, c=card: c.config(highlightbackground="#E62E5C"))
             widget.bind("<ButtonRelease-1>", lambda e, c=card: c.config(highlightbackground="#FF3366"))
-        
-        # Vincular también a los hijos que se crearon dentro de la card
-        for child in card.winfo_children():
-            child.bind("<Button-1>", on_click)
-            child.bind("<Enter>", lambda e, c=card: c.config(bg="#25252E", highlightbackground="#FF3366"))
-            child.bind("<Leave>", lambda e, c=card: c.config(bg="#1E1E24", highlightbackground="#29292E"))
-        
-        debug_log(f"DEBUG: Bindings creados para tarjeta '{nombre}'")
         return card, dot, lbl
 
     def escanear_personajes(self):
@@ -296,12 +225,6 @@ class LauncherPremiumAnime:
         # Forzar actualización del canvas
         self.frame_cards.update_idletasks()
         self.canvas_lista.configure(scrollregion=self.canvas_lista.bbox("all"))
-        
-        # Seleccionar el primer personaje automáticamente
-        if len(self.personajes_datos) > 0:
-            primer_nombre = list(self.personajes_datos.keys())[0]
-            debug_log(f"DEBUG: Seleccionando automáticamente el primer personaje: {primer_nombre}")
-            self.root.after(100, lambda: self.seleccionar_personaje(primer_nombre))
 
     def _cargar_thumbnail(self, ruta_img, size=32):
         try:
@@ -328,8 +251,6 @@ class LauncherPremiumAnime:
         debug_log(f"DEBUG: seleccionar_personaje llamado con {nombre}")
         self.personaje_seleccionado = nombre
         info = self.personajes_datos[nombre]
-        debug_log(f"DEBUG: Info personalidad = {info['personalidad'][:50]}...")
-        
         # Resaltar card seleccionada
         for n, c in self.cards.items():
             bg = "#2A2A35" if n == nombre else "#1E1E24"
@@ -343,40 +264,28 @@ class LauncherPremiumAnime:
                     pass
             if n == nombre:
                 c["frame"].tkraise()
-        
         # Actualizar panel derecho
-        debug_log(f"DEBUG: Actualizando nombre a: {info['nombre']}")
         self.lbl_nombre_personaje.config(text=info["nombre"])
-        
-        debug_log(f"DEBUG: Actualizando descripción")
         self.txt_desc.config(state="normal")
         self.txt_desc.delete("1.0", tk.END)
         self.txt_desc.insert("1.0", info["personalidad"])
         self.txt_desc.config(state="disabled")
-        
-        debug_log(f"DEBUG: Habilitando botón INVOCAR")
         btn_inv = getattr(self, "_btn_invocar_en_pantalla", None)
         if btn_inv:
-            debug_log(f"DEBUG: Botón INVOCAR encontrado, habilitando")
+            debug_log(f"DEBUG: Habilitando botón INVOCAR")
             btn_inv.config(state="normal")
         else:
             debug_log(f"DEBUG: ERROR: No se encontró botón INVOCAR")
-        
         activa = nombre in self.mascotas_activas
         btn_cerrar = getattr(self, "_btn_cerrar_esta_mascota", None)
         if btn_cerrar:
             btn_cerrar.config(state="normal" if activa else "disabled")
         self.lbl_estado.config(text="● EN PANTALLA" if activa else "", fg="#4CAF50" if activa else "#0F0F12")
-        
         # Preview grande
-        debug_log(f"DEBUG: Cargando preview para {nombre}")
         ruta_img = os.path.join(_base(), "personajes", info["folder"], info["imagen"])
-        debug_log(f"DEBUG: Ruta preview = {ruta_img}")
         if os.path.exists(ruta_img):
             try:
-                debug_log(f"DEBUG: Abriendo imagen...")
                 img = Image.open(ruta_img).convert("RGBA")
-                debug_log(f"DEBUG: Redimensionando...")
                 # Resize primero para mejor rendimiento
                 img = img.resize((160, 160), Image.Resampling.LANCZOS)
                 # Hacer blancos transparentes
@@ -388,20 +297,11 @@ class LauncherPremiumAnime:
                     else:
                         newData.append(p)
                 img.putdata(newData)
-                debug_log(f"DEBUG: Conviertiendo a PhotoImage...")
                 self.img_tk = ImageTk.PhotoImage(img)
-                debug_log(f"DEBUG: Dibujando preview en canvas...")
                 self.canvas_preview.delete("all")
                 self.canvas_preview.create_image(90, 90, image=self.img_tk)
-                debug_log(f"DEBUG: Preview actualizado exitosamente")
             except Exception as e:
                 debug_log(f"Error en preview: {e}")
-                import traceback
-                debug_log(f"Traceback: {traceback.format_exc()}")
-        else:
-            debug_log(f"DEBUG: Archivo no existe: {ruta_img}")
-        
-        debug_log(f"DEBUG: Llamando actualizar_estados")
         self.actualizar_estados()
 
     def actualizar_estados(self):
@@ -497,10 +397,8 @@ class LauncherPremiumAnime:
 
     def iniciar_tray_icon(self):
         try:
-            debug_log("DEBUG: Intentando iniciar tray icon...")
             import pystray
             from pystray import MenuItem as Item
-            debug_log("DEBUG: pystray importado correctamente")
 
             img_tray = Image.open(os.path.join(_base(), "app_icon.ico")).resize((64, 64))
             icono = pystray.Icon("shimeji", img_tray, "Shimeji Nexus", menu=pystray.Menu(
@@ -509,24 +407,16 @@ class LauncherPremiumAnime:
             ))
 
             def minimizar():
-                debug_log("DEBUG: Minimizando a bandeja...")
                 self.root.withdraw()
                 threading.Thread(target=icono.run, daemon=True).start()
 
             self.root.protocol("WM_DELETE_WINDOW", minimizar)
             self._tray_icon = icono
-            debug_log("DEBUG: Tray icon iniciado exitosamente")
-        except ImportError as e:
-            debug_log(f"DEBUG: ImportError en tray icon: {e}")
-        except Exception as e:
-            debug_log(f"DEBUG: Error en tray icon: {e}")
-            import traceback
-            debug_log(f"Traceback: {traceback.format_exc()}")
+        except ImportError:
+            pass
 
     def on_cerrar(self):
-        debug_log("DEBUG: on_cerrar llamado")
-        # No minimizar aquí - dejar que iniciar_tray lo maneje
-        # Para cerrar completamente: self.salir_completo()
+        self.root.withdraw()
 
     def salir_completo(self):
         self.matar_todos()

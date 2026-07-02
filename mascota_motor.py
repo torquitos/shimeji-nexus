@@ -84,6 +84,9 @@ class MascotaLogica:
             self.y_pos = self.screen_height - (self.tamano + 40)
 
         self.suelo_fijo = self.screen_height - (self.tamano + 40)
+        self.suelo_actual = self.suelo_fijo  # puede cambiar según ventanas
+        self.ultima_ventana = None
+        self.contador_ventana = 0
         if self.y_pos > self.suelo_fijo:
             self.y_pos = self.suelo_fijo
 
@@ -149,12 +152,41 @@ class MascotaLogica:
         self.tick_animacion = (self.tick_animacion + 1) % 16
         self.canvas.delete("particula")
 
-        if self.y_pos < self.suelo_fijo and self.estado != "arrastrando":
+        # Detectar ventanas cercanas para interacción física
+        ventana_bajo = self._ventana_bajo_pies()
+        self.suelo_actual = self.suelo_fijo
+        if ventana_bajo:
+            borde = ventana_bajo.top - self.tamano - 5
+            if 0 < borde < self.suelo_fijo:
+                self.suelo_actual = borde
+                if ventana_bajo != self.ultima_ventana:
+                    self.contador_ventana = 30
+                    self.ultima_ventana = ventana_bajo
+
+        # Oscurecer si está detrás de una ventana
+        if self._en_sombra_de_ventana():
+            try:
+                self.window.attributes("-alpha", 0.4)
+            except Exception:
+                pass
+        else:
+            try:
+                trans = settings.get("transparencia", 1.0)
+                self.window.attributes("-alpha", trans)
+            except Exception:
+                pass
+
+        if self.y_pos < self.suelo_actual and self.estado != "arrastrando":
             self.estado = "cayendo"
             self.y_pos += 16 * vel_mult
-            if self.y_pos > self.suelo_fijo:
-                self.y_pos = self.suelo_fijo
+            if self.y_pos >= self.suelo_actual:
+                self.y_pos = self.suelo_actual
                 self.estado = "quieto"
+                if self.contador_ventana > 0:
+                    self.mostrar_comentario_autonomo(
+                        random.choice(["¡Arriba!", "Aquí se ve bien~", "*se posa*", 
+                                       "¿Qué ventana es esta?", "Cómodo aquí"]))
+                    self.contador_ventana = 0
 
         if not self.chat_abierto and self.estado == "quieto" and self.siguiendo_a is None:
             rand = random.random()
@@ -226,12 +258,6 @@ class MascotaLogica:
 
         self.window.geometry(f"+{self.x_pos}+{int(self.y_pos - offset_y)}")
         self.actualizar_posicion_globo()
-
-        trans = settings.get("transparencia", 1.0)
-        try:
-            self.window.attributes("-alpha", trans)
-        except Exception:
-            pass
 
         self.tick_interaccion += 1
         if self.tick_interaccion % 5 == 0:
@@ -378,6 +404,47 @@ class MascotaLogica:
         except Exception:
             pass
         return vecinos
+
+    def _ventana_bajo_pies(self):
+        """Busca una ventana sobre cuyo borde superior está parada la mascota"""
+        cx = self.x_pos + self.tamano // 2
+        cy = self.y_pos + self.tamano  # justo en los pies
+        try:
+            for w in gw.getAllWindows():
+                if not w.visible or w.isMinimized:
+                    continue
+                t = w.title.lower()
+                if not t or any(x in t for x in ("mascota", "shimeji", "tk", "personaje")):
+                    continue
+                if w.width < 60 or w.height < 60:
+                    continue
+                # La mascota está horizontalmente sobre la ventana
+                # y verticalmente justo en su borde superior
+                if w.left <= cx <= w.right and w.top - 10 <= cy <= w.top + 10:
+                    return w
+        except Exception:
+            pass
+        return None
+
+    def _en_sombra_de_ventana(self):
+        """Verifica si hay una ventana NO nuestra tapando a la mascota"""
+        try:
+            user32 = ctypes.windll.user32
+            cx = self.x_pos + self.tamano // 2
+            cy = self.y_pos + self.tamano // 2
+            hwnd = user32.WindowFromPoint(cx, cy)
+            if hwnd:
+                # Obtener título de la ventana desde hwnd
+                length = user32.GetWindowTextLengthW(hwnd)
+                if length > 0:
+                    buf = ctypes.create_unicode_buffer(length + 1)
+                    user32.GetWindowTextW(hwnd, buf, length + 1)
+                    title = buf.value.lower()
+                    if title and "mascota" not in title and "shimeji" not in title and "tk" not in title:
+                        return True
+        except Exception:
+            pass
+        return False
 
     def procesar_interacciones(self):
         vecinos = self.leer_vecinos()
