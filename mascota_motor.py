@@ -154,27 +154,23 @@ class MascotaLogica:
 
         # Detectar ventanas cercanas para interacción física
         ventana_bajo = self._ventana_bajo_pies()
-        self.suelo_actual = self.suelo_fijo
         if ventana_bajo:
             borde = ventana_bajo.top - self.tamano - 5
             if 0 < borde < self.suelo_fijo:
                 self.suelo_actual = borde
                 if ventana_bajo != self.ultima_ventana:
-                    self.contador_ventana = 30
+                    self.contador_ventana = 20
                     self.ultima_ventana = ventana_bajo
-
-        # Oscurecer si está detrás de una ventana
-        if self._en_sombra_de_ventana():
-            try:
-                self.window.attributes("-alpha", 0.4)
-            except Exception:
-                pass
         else:
-            try:
-                trans = settings.get("transparencia", 1.0)
-                self.window.attributes("-alpha", trans)
-            except Exception:
-                pass
+            # Si no hay ventana, volver gradualmente al suelo fijo
+            self.contador_ventana -= 1
+            if self.contador_ventana <= 0:
+                self.suelo_actual = self.suelo_fijo
+                self.ultima_ventana = None
+
+        # Seguridad: evitar que y_pos se salga de la pantalla
+        if self.y_pos > self.suelo_fijo + 50 or self.y_pos < -200:
+            self.y_pos = self.suelo_fijo
 
         if self.y_pos < self.suelo_actual and self.estado != "arrastrando":
             self.estado = "cayendo"
@@ -258,6 +254,13 @@ class MascotaLogica:
 
         self.window.geometry(f"+{self.x_pos}+{int(self.y_pos - offset_y)}")
         self.actualizar_posicion_globo()
+
+        # Transparencia configurable
+        trans = settings.get("transparencia", 1.0)
+        try:
+            self.window.attributes("-alpha", trans)
+        except Exception:
+            pass
 
         self.tick_interaccion += 1
         if self.tick_interaccion % 5 == 0:
@@ -425,26 +428,6 @@ class MascotaLogica:
         except Exception:
             pass
         return None
-
-    def _en_sombra_de_ventana(self):
-        """Verifica si hay una ventana NO nuestra tapando a la mascota"""
-        try:
-            user32 = ctypes.windll.user32
-            cx = self.x_pos + self.tamano // 2
-            cy = self.y_pos + self.tamano // 2
-            hwnd = user32.WindowFromPoint(cx, cy)
-            if hwnd:
-                # Obtener título de la ventana desde hwnd
-                length = user32.GetWindowTextLengthW(hwnd)
-                if length > 0:
-                    buf = ctypes.create_unicode_buffer(length + 1)
-                    user32.GetWindowTextW(hwnd, buf, length + 1)
-                    title = buf.value.lower()
-                    if title and "mascota" not in title and "shimeji" not in title and "tk" not in title:
-                        return True
-        except Exception:
-            pass
-        return False
 
     def procesar_interacciones(self):
         vecinos = self.leer_vecinos()
