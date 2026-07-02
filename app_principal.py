@@ -185,6 +185,11 @@ class LauncherPremiumAnime:
             widget.bind("<Leave>", lambda e, c=card: c.config(bg="#1E1E24", highlightbackground="#29292E"))
             widget.bind("<ButtonPress-1>", lambda e, c=card: c.config(highlightbackground="#E62E5C"))
             widget.bind("<ButtonRelease-1>", lambda e, c=card: c.config(highlightbackground="#FF3366"))
+        # Bindear también a TODOS los hijos (thumb, dot, placeholder)
+        for child in card.winfo_children():
+            child.bind("<Button-1>", lambda e, n=nombre: self.seleccionar_personaje(n))
+            child.bind("<Enter>", lambda e, c=card: c.config(bg="#25252E", highlightbackground="#FF3366"))
+            child.bind("<Leave>", lambda e, c=card: c.config(bg="#1E1E24", highlightbackground="#29292E"))
         return card, dot, lbl
 
     def escanear_personajes(self):
@@ -225,6 +230,11 @@ class LauncherPremiumAnime:
         # Forzar actualización del canvas
         self.frame_cards.update_idletasks()
         self.canvas_lista.configure(scrollregion=self.canvas_lista.bbox("all"))
+        # Seleccionar el primer personaje automáticamente
+        if len(self.personajes_datos) > 0:
+            primer_nombre = list(self.personajes_datos.keys())[0]
+            debug_log(f"DEBUG: Seleccionando automáticamente el primer personaje: {primer_nombre}")
+            self.root.after(100, lambda: self.seleccionar_personaje(primer_nombre))
 
     def _cargar_thumbnail(self, ruta_img, size=32):
         try:
