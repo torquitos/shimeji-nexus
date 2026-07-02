@@ -153,7 +153,7 @@ class MascotaLogica:
         self.canvas.delete("particula")
 
         # Detectar ventanas cercanas para interacción física
-        ventana_bajo = self._ventana_bajo_pies()
+        ventana_bajo = self._ventana_para_sentarse(margen_extra=200)
         if ventana_bajo:
             borde = ventana_bajo.top - self.tamano - 5
             if 0 < borde < self.suelo_fijo:
@@ -302,6 +302,18 @@ class MascotaLogica:
         self.actualizar_posicion_globo()
 
     def soltar(self, event):
+        # Intentar sentarse en una ventana cercana
+        ventana = self._ventana_para_sentarse(margen_extra=100)
+        if ventana:
+            borde = ventana.top - self.tamano - 5
+            if 0 < borde < self.suelo_fijo:
+                self.y_pos = borde
+                self.suelo_actual = borde
+                self.estado = "quieto"
+                self.ultima_ventana = ventana
+                self.contador_ventana = 20
+                self.mostrar_comentario_autonomo("*se posa*")
+                return
         if self.y_pos < self.suelo_fijo:
             self.estado = "cayendo"
         else:
@@ -408,10 +420,13 @@ class MascotaLogica:
             pass
         return vecinos
 
-    def _ventana_bajo_pies(self):
-        """Busca una ventana sobre cuyo borde superior está parada la mascota"""
+    def _ventana_para_sentarse(self, margen_extra=0):
+        """Busca una ventana cuyo borde superior esté cerca de los pies de la mascota.
+        margen_extra: cuánto puede estar la ventana por DEBAJO de los pies (px)."""
         cx = self.x_pos + self.tamano // 2
-        cy = self.y_pos + self.tamano  # justo en los pies
+        cy = self.y_pos + self.tamano  # posición de los pies
+        mejor = None
+        mejor_dist = float('inf')
         try:
             for w in gw.getAllWindows():
                 if not w.visible or w.isMinimized:
@@ -421,13 +436,19 @@ class MascotaLogica:
                     continue
                 if w.width < 60 or w.height < 60:
                     continue
-                # La mascota está horizontalmente sobre la ventana
-                # y verticalmente justo en su borde superior
-                if w.left <= cx <= w.right and w.top - 10 <= cy <= w.top + 10:
-                    return w
+                # La mascota debe estar horizontalmente dentro de la ventana
+                if not (w.left <= cx <= w.right):
+                    continue
+                # Distancia vertical desde los pies hasta el borde superior
+                dist = w.top - cy
+                # Busca ventanas cuyo borde esté entre 30px arriba y margen_extra px abajo
+                if -30 <= dist <= margen_extra:
+                    if dist < mejor_dist:
+                        mejor_dist = dist
+                        mejor = w
         except Exception:
             pass
-        return None
+        return mejor
 
     def procesar_interacciones(self):
         vecinos = self.leer_vecinos()
