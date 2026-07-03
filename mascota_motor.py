@@ -101,6 +101,7 @@ class MascotaLogica:
         self.chat_abierto = False
         self.particulas = []
         self.tick_interaccion = 0
+        self.tick_mouse = 0
         self.ultimo_saludo = ""
         self.siguiendo_a = None
         self.seguir_restantes = 0
@@ -171,6 +172,24 @@ class MascotaLogica:
         # Seguridad: evitar que y_pos se salga de la pantalla
         if self.y_pos > self.suelo_fijo + 50 or self.y_pos < -200:
             self.y_pos = self.suelo_fijo
+
+        # Seguir al mouse cuando está cerca
+        if self.estado not in ("arrastrando", "cayendo", "magia"):
+            self.tick_mouse += 1
+            if self.tick_mouse % 4 == 0:
+                mouse = self._pos_mouse_global()
+                if mouse:
+                    dx = mouse[0] - (self.x_pos + self.tamano // 2)
+                    dy = mouse[1] - (self.y_pos + self.tamano // 2)
+                    dist = math.sqrt(dx * dx + dy * dy)
+                    if dist < 250 and abs(dy) < 200:
+                        self.direccion = 1 if dx > 0 else -1
+                        if dist < 70 and self.estado == "quieto" and self.tick_mouse > 60:
+                            self.estado = "saludo"
+                            self.pasos_restantes = 12
+                            self.mostrar_comentario_autonomo(
+                                random.choice(["¿Qué?", "¿Me llamaste?", "Hm?", "¿Sí?"]))
+                            self.tick_mouse = 0
 
         if self.y_pos < self.suelo_actual and self.estado != "arrastrando":
             self.estado = "cayendo"
@@ -449,6 +468,14 @@ class MascotaLogica:
         except Exception:
             pass
         return mejor
+
+    def _pos_mouse_global(self):
+        try:
+            point = ctypes.wintypes.POINT()
+            ctypes.windll.user32.GetCursorPos(ctypes.byref(point))
+            return point.x, point.y
+        except Exception:
+            return None
 
     def procesar_interacciones(self):
         vecinos = self.leer_vecinos()
