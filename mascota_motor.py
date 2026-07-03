@@ -102,7 +102,6 @@ class MascotaLogica:
         self.particulas = []
         self.tick_interaccion = 0
         self.tick_mouse = 0
-        self.siguiendo_mouse = False
         self.ultimo_saludo = ""
         self.siguiendo_a = None
         self.seguir_restantes = 0
@@ -174,8 +173,7 @@ class MascotaLogica:
         if self.y_pos > self.suelo_fijo + 50 or self.y_pos < -200:
             self.y_pos = self.suelo_fijo
 
-        # Seguir al mouse cuando está cerca
-        self.siguiendo_mouse = False
+        # Mirar al mouse cuando está cerca
         if self.estado not in ("arrastrando", "cayendo", "magia", "saludo"):
             self.tick_mouse += 1
             if self.tick_mouse % 4 == 0:
@@ -186,11 +184,7 @@ class MascotaLogica:
                     dist = math.sqrt(dx * dx + dy * dy)
                     if dist < 125 and abs(dy) < 150:
                         self.direccion = 1 if dx > 0 else -1
-                        self.siguiendo_mouse = True
-                        if dist > 30 and self.estado == "quieto":
-                            self.estado = "caminando"
-                            self.pasos_restantes = 20
-                        elif dist < 25 and self.estado == "quieto" and self.tick_mouse > 60:
+                        if dist < 25 and self.estado == "quieto" and self.tick_mouse > 60:
                             self.estado = "saludo"
                             self.pasos_restantes = 12
                             self.mostrar_comentario_autonomo(
@@ -226,16 +220,6 @@ class MascotaLogica:
                 self.direccion *= -1
             offset_y = abs(math.sin((self.tick_animacion / 16) * math.pi * 2)) * 6
             self.pasos_restantes -= 1
-            if self.siguiendo_mouse:
-                # Seguir actualizando dirección mientras el mouse esté cerca
-                mouse = self._pos_mouse_global()
-                if mouse:
-                    dx = mouse[0] - (self.x_pos + self.tamano // 2)
-                    if abs(dx) > 15:
-                        self.direccion = 1 if dx > 0 else -1
-                        self.pasos_restantes = max(self.pasos_restantes, 10)
-                    else:
-                        self.pasos_restantes = 0
             if self.pasos_restantes <= 0:
                 self.estado = "quieto"
                 self.siguiendo_a = None
