@@ -1,11 +1,9 @@
 import json
 import os
-import sys
 
-def _base():
-    return os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+from shimeji_nexus.core.paths import base_dir
 
-RUTA = os.path.join(_base(), "settings_cache.json")
+RUTA = os.path.join(base_dir(), "settings_cache.json")
 
 DEFAULT = {
     "monitoreo_ia": True,
@@ -16,6 +14,7 @@ DEFAULT = {
 }
 
 _cache = None
+
 
 def cargar():
     global _cache
@@ -30,6 +29,7 @@ def cargar():
             pass
     _cache = dict(DEFAULT)
     return _cache
+
 
 def guardar(settings):
     global _cache

@@ -1,14 +1,12 @@
-import struct
-import wave
-import os
-import threading
 import math
+import os
+import struct
+import threading
+import wave
 
-def _base():
-    import sys
-    return os.path.dirname(sys.executable) if getattr(sys, 'frozen', False) else os.path.dirname(os.path.abspath(__file__))
+from shimeji_nexus.core.paths import base_dir
 
-SOUNDS_DIR = os.path.join(_base(), "assets", "sounds")
+SOUNDS_DIR = os.path.join(base_dir(), "assets", "sounds")
 
 SOUNDS = {
     "invoke": (523, 659, 784, 1047),
@@ -17,6 +15,7 @@ SOUNDS = {
     "chat": (880, 1109),
     "error": (220, 165),
 }
+
 
 def _generar_wav(frecuencias, ruta, duracion_nota=0.12, sample_rate=44100):
     muestras = []
@@ -32,6 +31,7 @@ def _generar_wav(frecuencias, ruta, duracion_nota=0.12, sample_rate=44100):
         wf.setframerate(sample_rate)
         wf.writeframes(struct.pack(f"<{len(muestras)}h", *muestras))
 
+
 def asegurar_sonidos():
     if not os.path.exists(SOUNDS_DIR):
         os.makedirs(SOUNDS_DIR, exist_ok=True)
@@ -40,12 +40,13 @@ def asegurar_sonidos():
         if not os.path.exists(ruta):
             _generar_wav(frecuencias, ruta)
 
+
 def reproducir(nombre):
-    import pygame
     ruta = os.path.join(SOUNDS_DIR, f"{nombre}.wav")
     if not os.path.exists(ruta):
         return
     threading.Thread(target=_reproducir_audio, args=(ruta,), daemon=True).start()
+
 
 def _reproducir_audio(ruta):
     try:

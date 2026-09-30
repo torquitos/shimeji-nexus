@@ -88,14 +88,27 @@ Se abre un launcher con la lista de personajes disponibles. Seleccioná uno y pr
 
 ```
 Mascotas/
-├── app_principal.py       # Launcher con lista de personajes
-├── mascota_motor.py       # Motor de la mascota flotante
-├── ai_manager.py          # Abstracción multi-provider (Gemini/OpenAI/OpenRouter)
-├── sound_manager.py       # Generación y reproducción de sonidos
-├── settings_manager.py    # Persistencia de configuración
-├── requirements.txt       # Dependencias
-├── personajes/            # Carpetas de personajes (Gojo, Rias, naruto/)
-├── assets/sounds/         # Archivos de sonido generados
-├── shared_state/          # Estado compartido para interacción entre mascotas
-└── .env                   # Configuración de API keys (no se sube a git)
+├── app_principal.py         # Shim de compatibilidad -> shimeji_nexus.__main__
+├── mascota_motor.py         # Shim: punto de entrada del proceso hijo de cada mascota
+├── shimeji_nexus/            # Paquete con todo el código
+│   ├── __main__.py           # Punto de entrada (launcher o --mascota)
+│   ├── core/                 # paths, settings, logging, escaneo de personajes
+│   ├── ai/                   # cliente de IA multi-provider (Gemini/OpenAI/OpenRouter)
+│   ├── audio/                # generación y reproducción de sonidos
+│   ├── pet/                  # motor de la mascota flotante (animación, física, social, chat)
+│   ├── ui/                   # launcher, ventana de configuración, agregar personaje
+│   └── ipc/                  # estado compartido entre mascotas
+├── requirements.txt         # Dependencias
+├── personajes/               # Carpetas de personajes (Gojo, Rias, naruto/)
+├── assets/sounds/             # Archivos de sonido generados
+├── shared_state/              # Estado compartido para interacción entre mascotas
+└── .env                      # Configuración de API keys (no se sube a git)
+```
+
+## Ejecutar como módulo
+
+También se puede correr directamente el paquete:
+
+```bash
+python -m shimeji_nexus
 ```
