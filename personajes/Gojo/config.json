@@ -9,5 +9,97 @@
     "imagen": "quieto.png",
     "saludo": "Yo soy el más fuerte~",
     "color_globo": "#E3F2FD",
-    "color_texto": "#0D47A1"
+    "color_texto": "#0D47A1",
+    "frases": {
+        "mouse": [
+            "¿Me estás mirando? Normal, soy irresistible~",
+            "Ya sé, ya sé, soy fascinante~",
+            "¿Necesitas algo del más fuerte?"
+        ],
+        "aterrizar": [
+            "Desde aquí todo se ve más pequeño~",
+            "Esta ventana es mía ahora.",
+            "Aterrizaje perfecto, como siempre~"
+        ],
+        "posarse": [
+            "Buen sitio, para variar~",
+            "Me quedo aquí, no se hable más."
+        ],
+        "magia": [
+            "Expansión de dominio... ¡es broma~!",
+            "Esto es solo el 10% de mi poder~"
+        ],
+        "choque": [
+            "¡Cuidado! Soy el más fuerte, no el más paciente.",
+            "¡Oye, que me despeinas~!",
+            "Casi me tocas. Casi."
+        ],
+        "hola_otro": [
+            "Mira, {nombre}. Qué suerte tienes de verme~",
+            "¡{nombre}! ¿Me extrañabas?",
+            "Hola, {nombre}~ intenta no deslumbrarte."
+        ],
+        "bailar": [
+            "¡Soy el mejor hasta bailando~!",
+            "Esto sí es un espectáculo."
+        ],
+        "volar": [
+            "¡Flotar es lo mío~!",
+            "*levita con total elegancia*"
+        ],
+        "pomodoro_inicio": [
+            "{min} min de enfoque. Yo vigilo, tú trabaja~",
+            "Pomodoro de {min} min. Concéntrate, yo me encargo de ser genial~"
+        ],
+        "pomodoro_mitad": [
+            "Mitad del camino. Nada mal para un mortal~",
+            "Vas bien. Yo ya sabía que ibas a llegar~"
+        ],
+        "pomodoro_fin": [
+            "¡Tiempo! Descansa {descanso} min, hasta los más fuertes lo hacen~",
+            "Listo. {descanso} min de descanso, te los ganaste~"
+        ],
+        "descanso_fin": [
+            "Se acabó el recreo. ¿Otro pomodoro?~"
+        ],
+        "pomodoro_parar": [
+            "Pomodoro cancelado. Qué débil... es broma~"
+        ],
+        "pomodoro_nada": [
+            "No hay pomodoro activo. ¿Empezamos uno?~"
+        ],
+        "pomodoro_tiempo": [
+            "Quedan {restante} de {fase}~"
+        ],
+        "recordatorio_ok": [
+            "Anotado. En {min} min te aviso: {texto}~"
+        ],
+        "recordatorio": [
+            "¡Oye! Recordatorio: {texto}~"
+        ],
+        "recordatorio_tarde": [
+            "Se te pasó, pero yo no olvido: {texto}~"
+        ],
+        "responder_saludo": [
+            "Oh, {nombre}. Sabía que vendrías a verme~",
+            "Hola, {nombre}~ intenta seguirme el ritmo."
+        ],
+        "responder_baile": [
+            "No está mal, pero yo bailo mejor~",
+            "¡Ese es el espíritu~!"
+        ],
+        "reaccion_habilidad": [
+            "¡Wow, {nombre}! Casi tan bueno como yo~",
+            "Nada mal... para un principiante~"
+        ]
+    },
+    "habilidad": {
+        "nombre": "Vacío Púrpura",
+        "forma": "orbitar",
+        "colores": [
+            "#5b9bd9",
+            "#9b59eb",
+            "#7a5cff"
+        ]
+    }
 }

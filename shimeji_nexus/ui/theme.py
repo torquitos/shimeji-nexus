@@ -8,6 +8,7 @@ CARD_HOVER = "#1d1d28"
 BORDER = "#26262f"
 BORDER_SOFT = "#1e1e27"
 TEXT = "#eeeef2"
+TEXT_SOFT = "#b8b8c6"
 TEXT_DIM = "#9494a3"
 TEXT_FAINT = "#5c5c6b"
 SUCCESS = "#4caf7d"
@@ -39,10 +40,13 @@ def siguiente_color_rotativo(cantidad_existente):
 FONT_FAMILY = "Segoe UI"
 FONT_FAMILY_SEMIBOLD = "Segoe UI Semibold"
 
+FONT_TITLE = (FONT_FAMILY_SEMIBOLD, 28)
 FONT_DISPLAY = (FONT_FAMILY_SEMIBOLD, 22)
 FONT_HEADING = (FONT_FAMILY_SEMIBOLD, 14)
 FONT_BODY = (FONT_FAMILY, 12)
+FONT_BODY_LARGE = (FONT_FAMILY, 13)
 FONT_BODY_MEDIUM = (FONT_FAMILY, 12, "bold")
+FONT_BUTTON = (FONT_FAMILY_SEMIBOLD, 16)
 FONT_CAPTION = (FONT_FAMILY, 10)
 FONT_CAPTION_BOLD = (FONT_FAMILY, 10, "bold")
 
@@ -67,7 +71,11 @@ def blend_color(color_hex, fondo_hex, porcentaje):
 
 
 def acento_desde_color_texto(color_texto):
-    """`color_texto` en config.json esta pensado para texto sobre fondo claro
-    (globo de chat), por lo que suele ser oscuro/saturado. Lo aclaramos para
-    que funcione bien como acento sobre el dark UI del launcher."""
-    return blend_color("#ffffff", color_texto, 0.35)
+    """`color_texto` en config.json esta pensado para texto sobre fondo claro, por lo
+    que suele ser oscuro. Conservamos su tono y lo llevamos a un acento vivo para dark UI."""
+    import colorsys
+    c = color_texto.lstrip("#")
+    r, g, b = (int(c[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    h, _, _ = colorsys.rgb_to_hsv(r, g, b)
+    r, g, b = colorsys.hsv_to_rgb(h, 0.62, 0.92)
+    return f"#{round(r * 255):02x}{round(g * 255):02x}{round(b * 255):02x}"

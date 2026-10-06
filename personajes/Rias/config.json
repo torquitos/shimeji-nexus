@@ -9,5 +9,97 @@
     "imagen": "rias.png",
     "saludo": "Presidenta Rias. Clic derecho para opciones.",
     "color_globo": "#FFF0F5",
-    "color_texto": "#8B0000"
+    "color_texto": "#8B0000",
+    "frases": {
+        "mouse": [
+            "¿Necesitas algo, querido?",
+            "Estoy aquí si me necesitas.",
+            "Dime, te escucho."
+        ],
+        "aterrizar": [
+            "Un buen lugar para vigilar.",
+            "Desde aquí puedo cuidar de todo.",
+            "Perfecto. Me quedo aquí."
+        ],
+        "posarse": [
+            "Aquí estaré tranquila.",
+            "Un sitio adecuado."
+        ],
+        "magia": [
+            "¡Por el orgullo del clan Gremory!",
+            "Mi poder de la destrucción responde~"
+        ],
+        "choque": [
+            "Ten más cuidado, por favor.",
+            "¡Oh! Casi chocamos.",
+            "Con calma, no hay prisa."
+        ],
+        "hola_otro": [
+            "Buenos días, {nombre}. ¿Todo en orden?",
+            "{nombre}, qué alegría verte.",
+            "Hola, {nombre}. ¿Cómo va tu día?"
+        ],
+        "bailar": [
+            "Un poco de música no hace daño~",
+            "Me permito un baile."
+        ],
+        "volar": [
+            "Alzo el vuelo un momento.",
+            "*flota con elegancia*"
+        ],
+        "pomodoro_inicio": [
+            "Empecemos: {min} min de concentración. Confío en ti.",
+            "Pomodoro de {min} min. Yo te acompaño."
+        ],
+        "pomodoro_mitad": [
+            "Vas por la mitad. Sigue así, lo estás haciendo bien.",
+            "Mitad del camino. Estoy orgullosa de tu esfuerzo."
+        ],
+        "pomodoro_fin": [
+            "Buen trabajo. Descansa {descanso} min, te lo mereces.",
+            "Tiempo cumplido. Respira {descanso} min, querido."
+        ],
+        "descanso_fin": [
+            "El descanso terminó. ¿Retomamos?"
+        ],
+        "pomodoro_parar": [
+            "Está bien, lo dejamos. Lo importante es que descanses."
+        ],
+        "pomodoro_nada": [
+            "No hay ningún pomodoro en marcha. ¿Quieres que empecemos uno?"
+        ],
+        "pomodoro_tiempo": [
+            "Te quedan {restante} de {fase}."
+        ],
+        "recordatorio_ok": [
+            "Entendido. En {min} min te recuerdo: {texto}"
+        ],
+        "recordatorio": [
+            "Querido, te lo recuerdo: {texto}"
+        ],
+        "recordatorio_tarde": [
+            "Disculpa el retraso, esto estaba pendiente: {texto}"
+        ],
+        "responder_saludo": [
+            "Hola, {nombre}. Me alegra verte.",
+            "{nombre}, qué amable de tu parte."
+        ],
+        "responder_baile": [
+            "Qué bien se mueve, {nombre}.",
+            "Me gusta ese ritmo~"
+        ],
+        "reaccion_habilidad": [
+            "Impresionante, {nombre}.",
+            "Qué poder, {nombre}. Cuidado con excederte."
+        ]
+    },
+    "habilidad": {
+        "nombre": "Poder de la Destrucción",
+        "forma": "brasas",
+        "colores": [
+            "#e0364d",
+            "#ff6a4d",
+            "#b0102a"
+        ]
+    }
 }

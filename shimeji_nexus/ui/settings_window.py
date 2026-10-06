@@ -9,7 +9,7 @@ class SettingsWindow:
         self.parent = parent
         self.win = ctk.CTkToplevel(parent)
         self.win.title("Configuración")
-        self.win.geometry("420x480")
+        self.win.geometry("420x720")
         self.win.configure(fg_color=theme.BG)
         self.win.resizable(False, False)
         self.win.transient(parent)
@@ -32,6 +32,9 @@ class SettingsWindow:
         self.var_sonido = ctk.BooleanVar(value=self.settings.get("sonido", True))
         self._crear_switch(main_frame, "Sonidos de la aplicación", "Efectos de sonido al invocar y cerrar", self.var_sonido)
 
+        self.var_hab_auto = ctk.BooleanVar(value=self.settings.get("habilidad_auto", True))
+        self._crear_switch(main_frame, "Habilidades automáticas", "Cada 2 a 5 min usan su habilidad solos", self.var_hab_auto)
+
         ctk.CTkFrame(main_frame, fg_color=theme.BORDER, height=1).pack(fill="x", pady=(8, 20))
 
         self.var_transparencia = ctk.DoubleVar(value=self.settings.get("transparencia", 1.0))
@@ -39,6 +42,11 @@ class SettingsWindow:
 
         self.var_velocidad = ctk.DoubleVar(value=self.settings.get("velocidad", 1.0))
         self._crear_slider(main_frame, "Velocidad de animación", self.var_velocidad, 0.2, 3.0)
+
+        self.var_trabajo = ctk.DoubleVar(value=self.settings.get("pomodoro_trabajo", 25))
+        self._crear_slider(main_frame, "Pomodoro: minutos de trabajo", self.var_trabajo, 5, 60, 55)
+        self.var_descanso = ctk.DoubleVar(value=self.settings.get("pomodoro_descanso", 5))
+        self._crear_slider(main_frame, "Pomodoro: minutos de descanso", self.var_descanso, 1, 30, 29)
 
         ctk.CTkButton(
             main_frame, text="Guardar configuración", command=self.guardar,
@@ -58,19 +66,22 @@ class SettingsWindow:
             progress_color=theme.ACCENT_DEFAULT, button_color=theme.TEXT, button_hover_color=theme.TEXT,
         ).pack(side="right")
 
-    def _crear_slider(self, parent, titulo, variable, minimo, maximo):
+    def _crear_slider(self, parent, titulo, variable, minimo, maximo, pasos=None):
         ctk.CTkLabel(parent, text=titulo, font=theme.FONT_BODY_MEDIUM, text_color=theme.TEXT, anchor="w").pack(anchor="w", pady=(4, 8))
         ctk.CTkSlider(
             parent, from_=minimo, to=maximo, variable=variable,
             progress_color=theme.ACCENT_DEFAULT, button_color=theme.TEXT, button_hover_color=theme.TEXT,
-            fg_color=theme.BORDER, height=16,
+            fg_color=theme.BORDER, height=16, number_of_steps=pasos,
         ).pack(fill="x", pady=(0, 16))
 
     def guardar(self):
         self.settings["monitoreo_ia"] = self.var_monitoreo.get()
         self.settings["particulas"] = self.var_particulas.get()
         self.settings["sonido"] = self.var_sonido.get()
+        self.settings["habilidad_auto"] = self.var_hab_auto.get()
         self.settings["transparencia"] = self.var_transparencia.get()
         self.settings["velocidad"] = self.var_velocidad.get()
+        self.settings["pomodoro_trabajo"] = int(round(self.var_trabajo.get()))
+        self.settings["pomodoro_descanso"] = int(round(self.var_descanso.get()))
         settings_manager.guardar(self.settings)
         self.win.destroy()

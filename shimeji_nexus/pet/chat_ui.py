@@ -11,7 +11,8 @@ from shimeji_nexus.audio import sound_manager
 class ChatBubble:
     """Globo de chat: texto, entry de usuario, comentarios autónomos y monitoreo de IA."""
 
-    def __init__(self, window, config, x_pos, y_pos, on_estado_quieto):
+    def __init__(self, window, config, x_pos, y_pos, on_estado_quieto, on_comando=None):
+        self.on_comando = on_comando
         self.window = window
         self.config = config
         self.chat_abierto = False
@@ -24,7 +25,6 @@ class ChatBubble:
         self.globo_lbl = tk.Label(self.globo, text=config.get("saludo", "¡Hola!"), bg="#16161D", fg="#E1E1E6", font=("Segoe UI", 10, "bold"), wraplength=220, justify="center")
         self.globo_lbl.pack(padx=12, pady=10)
         self.entry_chat = tk.Entry(self.globo, bg="#24242D", fg="white", bd=0, insertbackground="white", font=("Segoe UI", 10), highlightthickness=1, highlightbackground="#FF3366")
-        self.entry_chat.pack(padx=12, pady=8, fill="x")
         self.entry_chat.bind("<Return>", self.enviar_mensaje_usuario)
 
         self.actualizar_posicion(x_pos, y_pos)
@@ -36,9 +36,11 @@ class ChatBubble:
         sound_manager.reproducir("chat")
         if self.chat_abierto:
             self.globo.withdraw()
+            self.entry_chat.pack_forget()
             self.chat_abierto = False
         else:
             self.globo.deiconify()
+            self.entry_chat.pack(padx=12, pady=8, fill="x")
             self.chat_abierto = True
             self.on_estado_quieto()
             self.entry_chat.focus_set()
@@ -48,6 +50,9 @@ class ChatBubble:
         if not msg:
             return
         self.entry_chat.delete(0, tk.END)
+        if msg.startswith("/") and self.on_comando:
+            self.globo_lbl.config(text=self.on_comando(msg))
+            return
         self.globo_lbl.config(text="Pensando...")
         sound_manager.reproducir("chat")
         threading.Thread(target=self._procesar_conversacion_ia, args=(msg,), daemon=True).start()
@@ -80,3 +85,10 @@ class ChatBubble:
             self.globo_lbl.config(text=texto)
             self.globo.deiconify()
             self.window.after(7000, lambda: self.globo.withdraw() if not self.chat_abierto else None)
+
+    def avisar(self, texto, ms=15000):
+        """Aviso que se muestra aunque el chat este abierto (pomodoro, recordatorios, comandos)."""
+        self.globo_lbl.config(text=texto)
+        self.globo.deiconify()
+        if not self.chat_abierto:
+            self.window.after(ms, lambda: self.globo.withdraw() if not self.chat_abierto else None)

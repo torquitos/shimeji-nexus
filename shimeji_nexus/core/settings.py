@@ -11,6 +11,9 @@ DEFAULT = {
     "sonido": True,
     "transparencia": 1.0,
     "velocidad": 1.0,
+    "habilidad_auto": True,
+    "pomodoro_trabajo": 25,
+    "pomodoro_descanso": 5,
 }
 
 _cache = None

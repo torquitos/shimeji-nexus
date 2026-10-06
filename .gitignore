@@ -55,3 +55,6 @@ shared_state/
 
 # PyInstaller
 *.spec
+
+# Recordatorios de cada mascota
+recordatorios/

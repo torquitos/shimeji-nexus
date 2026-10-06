@@ -13,7 +13,7 @@ PROVIDER_KEY_MAP = {
 }
 
 MODEL_MAP = {
-    "gemini": "gemini-2.5-flash",
+    "gemini": "gemini-flash-lite-latest",
     "openai": "gpt-4o-mini",
     "openrouter": "openai/gpt-4o-mini",
 }

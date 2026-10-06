@@ -4,5 +4,97 @@
     "imagen": "naruto.png",
     "saludo": "¡Believe it! ¿Qué pasa?",
     "color_globo": "#FFF3E0",
-    "color_texto": "#E65100"
+    "color_texto": "#E65100",
+    "frases": {
+        "mouse": [
+            "¿Eh? ¿Me llamabas, dattebayo?",
+            "¡Aquí estoy!",
+            "¿Quieres jugar o qué?"
+        ],
+        "aterrizar": [
+            "¡Qué buena vista, dattebayo!",
+            "¡Llegué hasta aquí arriba!",
+            "¡Este será mi nuevo escondite!"
+        ],
+        "posarse": [
+            "¡Listo, aquí me quedo!",
+            "¡Buen lugar, dattebayo!"
+        ],
+        "magia": [
+            "¡Chakra al máximo, dattebayo!",
+            "¡Rasengan... casi!"
+        ],
+        "choque": [
+            "¡Ey, fíjate por dónde vas!",
+            "¡Casi me caigo, dattebayo!",
+            "¡Uf, qué susto!"
+        ],
+        "hola_otro": [
+            "¡Ey, {nombre}! ¿Qué hay de nuevo?",
+            "¡{nombre}! ¡Vamos a entrenar!",
+            "¡Hola, {nombre}, dattebayo!"
+        ],
+        "bailar": [
+            "¡A bailar, dattebayo!",
+            "¡Nadie baila mejor que yo!"
+        ],
+        "volar": [
+            "¡Mira cómo salto, dattebayo!",
+            "¡Arriba, arriba!"
+        ],
+        "pomodoro_inicio": [
+            "¡{min} min a darlo todo, dattebayo!",
+            "¡Vamos con {min} min, no pienso rendirme!"
+        ],
+        "pomodoro_mitad": [
+            "¡Mitad del camino, no te rindas, dattebayo!",
+            "¡Ya casi! ¡Tú puedes!"
+        ],
+        "pomodoro_fin": [
+            "¡Lo lograste, dattebayo! Descansa {descanso} min.",
+            "¡Tiempo! ¡{descanso} min de ramen... digo, de descanso!"
+        ],
+        "descanso_fin": [
+            "¡A trabajar otra vez, dattebayo!"
+        ],
+        "pomodoro_parar": [
+            "¡Ok, lo dejamos! ¡Pero mañana lo retomamos!"
+        ],
+        "pomodoro_nada": [
+            "¡No hay ningún pomodoro! ¿Empezamos uno, dattebayo?"
+        ],
+        "pomodoro_tiempo": [
+            "¡Faltan {restante} de {fase}, dattebayo!"
+        ],
+        "recordatorio_ok": [
+            "¡Anotado, dattebayo! En {min} min te aviso: {texto}"
+        ],
+        "recordatorio": [
+            "¡Ey! ¡No te olvides de esto: {texto}!"
+        ],
+        "recordatorio_tarde": [
+            "¡Perdón, se me pasó! Era esto: {texto}"
+        ],
+        "responder_saludo": [
+            "¡Ey, {nombre}! ¡Qué bueno verte, dattebayo!",
+            "¡Hola, {nombre}!"
+        ],
+        "responder_baile": [
+            "¡Wooow, qué baile, dattebayo!",
+            "¡Yo también quiero bailar!"
+        ],
+        "reaccion_habilidad": [
+            "¡Increíble, {nombre}! ¡Yo también puedo hacer eso, dattebayo!",
+            "¡Guau, qué técnica, {nombre}!"
+        ]
+    },
+    "habilidad": {
+        "nombre": "Rasengan",
+        "forma": "espiral",
+        "colores": [
+            "#4aa8ff",
+            "#bfe6ff",
+            "#1f5fbf"
+        ]
+    }
 }
