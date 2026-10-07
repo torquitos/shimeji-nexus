@@ -40,6 +40,8 @@ class MascotaLogica:
         self.pomodoro = Pomodoro(ajustes.get("pomodoro_trabajo", 25), ajustes.get("pomodoro_descanso", 5))
         self.recordatorios = Recordatorios(self.config.get("nombre", "personaje"))
         self._ult_prod = 0.0
+        self._ult_mov = 0.0
+        self._resto_x = 0.0
         self.habilidad_auto = ajustes.get("habilidad_auto", True)
         self._prox_habilidad = time.time() + random.uniform(120, 300)
 
@@ -58,6 +60,7 @@ class MascotaLogica:
         self.tamano = 200
         self.estado = "quieto"
         self.animacion = AnimationEngine(ruta_personaje, self.config, self.tamano)
+        self.vel_caminar = float(((self.config.get("animaciones") or {}).get("caminando") or {}).get("velocidad", 3))
 
         self.canvas = tk.Canvas(self.window, width=self.tamano, height=self.tamano, bg="black", bd=0, highlightthickness=0)
         self.canvas.pack()
@@ -65,7 +68,7 @@ class MascotaLogica:
         self.reloj_id = self.canvas.create_text(self.tamano // 2, 10, text="", fill="#ffffff", font=("Segoe UI", 10, "bold"))
         self.reloj_fondo = self.canvas.create_rectangle(0, 0, 0, 0, fill="#16161D", outline="#3a3a4a", state="hidden")
         self.canvas.tag_lower(self.reloj_fondo, self.reloj_id)
-        self.efecto = EfectoHabilidad(self.canvas, self.sprite_canvas_id, self.tamano, self.habilidad, self.window)
+        self.efecto = EfectoHabilidad(self.canvas, self.sprite_canvas_id, self.tamano, self.habilidad, self.window, sprite_propio="magia" in self.animacion.anim)
 
         # Menú contextual
         self.menu = tk.Menu(self.window, tearoff=0, bg="#16161D", fg="white", activebackground="#FF3366")
@@ -183,7 +186,7 @@ class MascotaLogica:
 
         offset_y = 0
         if self.estado == "caminando":
-            self.x_pos += int(3 * self.animacion.direccion * vel_mult)
+            self.x_pos += self._avance(self.vel_caminar, vel_mult) * self.animacion.direccion
             if self.x_pos < 0 or self.x_pos > self.screen_width - self.tamano:
                 self.animacion.direccion *= -1
             offset_y = self.animacion.offset_y_para_estado("caminando")
@@ -199,7 +202,7 @@ class MascotaLogica:
                     dx = objetivo["x"] - self.x_pos
                     self.animacion.direccion = 1 if dx > 0 else -1
                     if abs(dx) > 110:
-                        self.x_pos += int(2.5 * self.animacion.direccion * vel_mult)
+                        self.x_pos += self._avance(self.vel_caminar * 0.8, vel_mult) * self.animacion.direccion
                         offset_y = self.animacion.offset_y_para_estado("siguiendo")
                 self.seguir_restantes -= 1
                 if self.seguir_restantes <= 0:
@@ -229,8 +232,13 @@ class MascotaLogica:
                 if self.pasos_restantes <= 0:
                     self.estado = "quieto"
 
+        if self.estado == "magia" and self.efecto.t is not None:
+            t = self.efecto.t
+            self.animacion.indice_magia = 0 if t < 8 else 1 if t < 18 else 2 if t < 28 else 3 if t < 50 else 4
         self.img_actual_tk = self.animacion.frame_actual(self.estado)
         self.canvas.itemconfig(self.sprite_canvas_id, image=self.img_actual_tk)
+        balanceo = self.animacion.balanceo_x() if self.estado in ("caminando", "siguiendo") else 0
+        self.canvas.coords(self.sprite_canvas_id, self.tamano // 2 + balanceo, self.tamano // 2)
 
         if particulas_on:
             self.renderizar_y_mover_particulas()
@@ -275,6 +283,17 @@ class MascotaLogica:
             self.seguir_restantes = cambios["seguir_restantes"]
         if "tick_interaccion" in cambios:
             self.tick_interaccion = cambios["tick_interaccion"]
+
+    def _avance(self, vel_por_tick, vel_mult):
+        """Pixeles a avanzar ahora. La velocidad se define por cada 35 ms, pero se aplica con el tiempo
+        real transcurrido para que los pies no patinen si el motor va mas lento que eso."""
+        ahora = time.time()
+        dt = min(0.12, ahora - self._ult_mov) if self._ult_mov else 0.035
+        self._ult_mov = ahora
+        self._resto_x += vel_por_tick / 0.035 * dt * vel_mult
+        px = int(self._resto_x)
+        self._resto_x -= px
+        return px
 
     @staticmethod
     def _num(m):

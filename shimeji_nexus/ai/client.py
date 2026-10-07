@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 from shimeji_nexus.ai import providers
 
-load_dotenv()
+load_dotenv(override=True)
 
 PROVIDER_KEY_MAP = {
     "gemini": "GEMINI_API_KEY",
@@ -19,6 +19,14 @@ MODEL_MAP = {
 }
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
+PROVEEDORES = {
+    "gemini": ("Gemini", "GEMINI_API_KEY", "https://aistudio.google.com/apikey"),
+    "openai": ("OpenAI", "OPENAI_API_KEY", "https://platform.openai.com/api-keys"),
+    "openrouter": ("OpenRouter", "OPENROUTER_API_KEY", "https://openrouter.ai/keys"),
+}
+
+MENSAJE_SIN_CLAVE = "Falta tu clave de IA. Agrégala en Ajustes > Inteligencia artificial."
 
 
 def _leer_provider():
@@ -45,7 +53,7 @@ def generar_texto(system_prompt, user_text, max_palabras=12):
     provider = _leer_provider()
     api_key = _leer_key(provider)
     if not api_key:
-        return "Error: API key no configurada"
+        return MENSAJE_SIN_CLAVE
     user_content = f"El usuario dice: '{user_text}'. Responde corto ({max_palabras} palabras max) en espanol."
     try:
         resultado = _completar(provider, api_key, system_prompt, user_content, max_tokens=80)
@@ -60,7 +68,7 @@ def generar_comentario_entorno(system_prompt, ventana_activa, max_palabras=10):
     provider = _leer_provider()
     api_key = _leer_key(provider)
     if not api_key:
-        return "Error: API key no configurada"
+        return MENSAJE_SIN_CLAVE
     user_content = f"El usuario esta viendo: '{ventana_activa}'. Comenta en personaje ({max_palabras} palabras max)."
     try:
         resultado = _completar(provider, api_key, system_prompt, user_content, max_tokens=60)
@@ -69,3 +77,19 @@ def generar_comentario_entorno(system_prompt, ventana_activa, max_palabras=10):
         return resultado
     except Exception as e:
         return f"Error: {e}"
+
+
+def probar_clave(provider, api_key):
+    """Hace una llamada minima para saber si la clave sirve. Devuelve (ok, mensaje)."""
+    try:
+        _completar(provider, api_key, "Eres un asistente.", "Responde solo con la palabra: ok", max_tokens=20)
+        return True, "Conexión correcta. La clave funciona."
+    except Exception as e:
+        texto = str(e)
+        if any(k in texto for k in ("401", "403", "UNAUTHENTICATED", "API key not valid", "Incorrect API key", "PERMISSION_DENIED")):
+            return False, "La clave no es válida o no tiene permiso."
+        if "429" in texto or "RESOURCE_EXHAUSTED" in texto:
+            return False, "La clave es válida pero se agotó su cuota."
+        if "503" in texto or "UNAVAILABLE" in texto:
+            return False, "El servicio está saturado ahora. Prueba en un momento."
+        return False, "No se pudo conectar: " + texto[:110]

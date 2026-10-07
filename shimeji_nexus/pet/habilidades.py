@@ -120,7 +120,8 @@ class EfectoHabilidad:
 
     TAG = "particula"
 
-    def __init__(self, canvas, sprite_id, tamano, habilidad, master=None):
+    def __init__(self, canvas, sprite_id, tamano, habilidad, master=None, sprite_propio=False):
+        self.sprite_propio = sprite_propio
         self.c = canvas
         self.sprite = sprite_id
         self.master = master
@@ -241,7 +242,7 @@ class EfectoHabilidad:
                 x, y = sx + math.cos(p["ang"]) * p["r"], sy + math.sin(p["ang"]) * p["r"]
                 self.c.create_oval(x - 2, y - 2, x + 2, y + 2, fill=p["col"], outline="", tags=self.TAG)
                 vivas.append(p)
-            if self.nucleo > 0.02:
+            if self.nucleo > 0.02 and not self.sprite_propio:
                 R = 21 * self.nucleo
                 self.c.create_oval(sx - R * 1.25, sy - R * 1.25, sx + R * 1.25, sy + R * 1.25,
                                    fill=_apagar(self.colores[0], 0.5), outline="", tags=self.TAG)
@@ -308,16 +309,19 @@ class EfectoHabilidad:
         k = 1.0 if t <= 56 else 1 - (t - 56) / 10
         if k <= 0.05:
             return
-        y = oy - 262
-        pts = [ox - 220 + desp, y - 24, ox + 240 + desp, y - 24, ox + 215 + desp, y + 24, ox - 245 + desp, y + 24]
-        c.create_polygon(pts, fill=_apagar("#16161f", k), outline=_apagar(self.colores[0], k), width=3, tags="fx")
-        c.create_text(ox + desp, y, text=self.nombre.upper(), font=("Segoe UI", 20, "bold italic"),
+        mitad = max(105, len(self.nombre) * 6.6 + 34)
+        y = oy - 250
+        pts = [ox - mitad + 12 + desp, y - 15, ox + mitad + 12 + desp, y - 15, ox + mitad - 2 + desp, y + 15, ox - mitad - 2 + desp, y + 15]
+        c.create_polygon(pts, fill=_apagar("#16161f", k), outline=_apagar(self.colores[0], k), width=2, tags="fx")
+        c.create_text(ox + 5 + desp, y, text=self.nombre.upper(), font=("Segoe UI", 12, "bold italic"),
                       fill=_apagar("#ffffff", k), tags="fx")
 
     def _fx_orbitar(self, c, t, ox, oy):
         d = self.direccion
         mx, my = ox + d * 70, oy - 14
         azul, rojo, morado = "#4aa8ff", "#ff4a6a", self.colores[1]
+        if t < CARGA and self.sprite_propio:
+            return
         if t < CARGA:
             p = t / CARGA
             h = (1 - _ease(p)) * 60 + 2
@@ -346,6 +350,8 @@ class EfectoHabilidad:
         d = self.direccion
         ang = 0 if d > 0 else 180
         cy = oy - 6
+        if t < CARGA and self.sprite_propio:
+            return
         if t < CARGA:
             p = _ease(t / CARGA)
             R = 6 + 16 * p + random.uniform(0, 2)

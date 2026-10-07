@@ -96,5 +96,48 @@
             "#bfe6ff",
             "#1f5fbf"
         ]
+    },
+    "animaciones": {
+        "caminando": {
+            "frames": [
+                "anim/caminando_0.png",
+                "anim/caminando_1.png",
+                "anim/caminando_2.png",
+                "anim/caminando_3.png",
+                "anim/caminando_4.png",
+                "anim/caminando_5.png",
+                "anim/caminando_6.png"
+            ],
+            "fps": 8,
+            "velocidad": 4.0
+        },
+        "quieto": {
+            "frames": [
+                "anim/quieto_0.png",
+                "anim/quieto_1.png",
+                "anim/quieto_2.png",
+                "anim/quieto_3.png"
+            ],
+            "fps": 3
+        },
+        "saludo": {
+            "frames": [
+                "anim/saludo_0.png",
+                "anim/saludo_1.png",
+                "anim/saludo_2.png",
+                "anim/saludo_3.png"
+            ],
+            "fps": 6
+        },
+        "magia": {
+            "frames": [
+                "anim/magia_0.png",
+                "anim/magia_1.png",
+                "anim/magia_2.png",
+                "anim/magia_3.png",
+                "anim/magia_4.png"
+            ],
+            "fps": 8
+        }
     }
 }
