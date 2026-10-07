@@ -3,9 +3,11 @@ import math
 import random
 import tkinter as tk
 
+from PIL import Image, ImageChops, ImageFilter, ImageTk
+
 from shimeji_nexus.ui.theme import acento_desde_color_texto, blend_color
 
-FORMAS = ("orbitar", "brasas", "espiral")
+FORMAS = ("orbitar", "brasas", "espiral", "rayo")
 
 # Linea de tiempo de una habilidad, en ticks de 35 ms (92 ticks = 3.2 s)
 CARGA, DISPARO, IMPACTO, TOTAL = 28, 22, 16, 92
@@ -120,7 +122,10 @@ class EfectoHabilidad:
 
     TAG = "particula"
 
-    def __init__(self, canvas, sprite_id, tamano, habilidad, master=None, sprite_propio=False):
+    def __init__(self, canvas, sprite_id, tamano, habilidad, master=None, sprite_propio=False, silueta=None):
+        self.silueta = silueta
+        self.tamano = tamano
+        self._aura_foto = None
         self.sprite_propio = sprite_propio
         self.c = canvas
         self.sprite = sprite_id
@@ -159,8 +164,8 @@ class EfectoHabilidad:
                     "tam": random.uniform(6, 10), "dy": random.uniform(-34, 34),
                     "col": self._color(), "vida": 1.0,
                 })
-        elif self.forma == "brasas":
-            for _ in range(5):
+        elif self.forma in ("brasas", "rayo"):
+            for _ in range(0 if self.silueta else 5):
                 self.parts.append({
                     "x": self.cx + random.uniform(-42, 42), "y": self.cy + random.uniform(10, 72),
                     "vx": random.uniform(-0.6, 0.6), "vy": -random.uniform(1.5, 3.6),
@@ -189,6 +194,45 @@ class EfectoHabilidad:
                                         width=2, tags=self.TAG)
             self.c.tag_lower(anillo, self.sprite)
 
+    @staticmethod
+    def _desplazar(mascara, dx, dy):
+        salida = Image.new("L", mascara.size, 0)
+        salida.paste(mascara, (dx, dy))
+        return salida
+
+    def _ondular(self, mascara, amplitud, fase):
+        salida = Image.new("L", mascara.size, 0)
+        for y in range(mascara.height):
+            dx = round(amplitud * math.sin(y * 0.55 + fase))
+            salida.paste(ImageChops.offset(mascara.crop((0, y, mascara.width, y + 1)), dx, 0), (0, y))
+        return salida
+
+    def _aura_silueta(self, alfa):
+        """Aura que abraza la silueta del personaje, en tres capas de pixeles grandes que ondulan
+        y suben como llamas. Se dibuja detras del sprite."""
+        t = self.t
+        inten = min(1.0, t / CARGA) if t < CARGA else (1.0 if t < 40 else max(0.0, 1 - (t - 40) / 10))
+        if inten <= 0.05:
+            return
+        rej = 50
+        base = alfa.resize((rej, rej), Image.Resampling.BOX).point(lambda v: 255 if v > 50 else 0)
+        radio = 3 + round(2 * inten)
+        fase = t * 0.65
+        capas = []
+        for r, color, onda, sube in ((radio, self.colores[2], 2.2, 5), (max(1, round(radio * 0.6)), self.colores[0], 1.4, 3), (max(1, round(radio * 0.3)), self.colores[1], 0.0, 0)):
+            m = base.filter(ImageFilter.MaxFilter(2 * r + 1))
+            for k in range(2, sube + 1, 2):
+                m = ImageChops.lighter(m, self._desplazar(m, 0, -k))
+            capas.append((self._ondular(m, onda, fase + r), color))
+        img = Image.new("RGBA", (rej, rej), (0, 0, 0, 0))
+        brillo = 0.45 + 0.55 * inten
+        for m, color in capas:
+            img.paste(Image.new("RGBA", (rej, rej), _apagar(color, brillo)), (0, 0), m)
+        grande = img.resize((self.tamano, self.tamano), Image.Resampling.NEAREST)
+        self._aura_foto = ImageTk.PhotoImage(grande)
+        item = self.c.create_image(self.tamano // 2, self.tamano // 2, image=self._aura_foto, tags=self.TAG)
+        self.c.tag_lower(item, self.sprite)
+
     def _estallido_chispas(self):
         for _ in range(34):
             a, v = random.uniform(0, 6.28), random.uniform(2.5, 7)
@@ -201,8 +245,12 @@ class EfectoHabilidad:
             self.vivo -= 1
         self.fase += 0.35
         cargando = self.t is not None and self.t < CARGA
-        if self.t is not None and self.t < CARGA + 4:
-            self._aura()
+        if self.t is not None and self.t < CARGA + DISPARO:
+            alfa = self.silueta() if self.silueta else None
+            if alfa is not None:
+                self._aura_silueta(alfa)
+            elif self.t < CARGA + 4:
+                self._aura()
         vivas = []
 
         if self.forma == "orbitar":
@@ -219,7 +267,7 @@ class EfectoHabilidad:
                 self._orbe(x, y, p["tam"] * (0.75 if detras else 1.0), blend_color(p["col"], "#000000", p["vida"]), detras)
                 vivas.append(p)
 
-        elif self.forma == "brasas":
+        elif self.forma in ("brasas", "rayo"):
             for p in self.parts:
                 p["x"] += p["vx"] + random.uniform(-0.3, 0.3)
                 p["y"] += p["vy"]
@@ -365,6 +413,14 @@ class EfectoHabilidad:
                     continue
                 c.create_arc(ox - ri, cy - ri, ox + ri, cy + ri, start=ang - 38, extent=76, style="arc",
                              outline=_apagar(self.colores[i % 2], 1 - q * 0.85 - i * 0.08), width=max(2, 9 - i * 2), tags="fx")
+            ex = ox + d * (50 + 250 * _ease(q))
+            R = 20 + 6 * q
+            for i in range(4, 0, -1):
+                rr = R * (1 - 0.15 * i)
+                c.create_oval(ex - d * i * 18 - rr, cy - rr, ex - d * i * 18 + rr, cy + rr,
+                              fill=_apagar(self.colores[2], 0.55 - i * 0.1), outline="", tags="fx")
+            c.create_oval(ex - R * 1.3, cy - R * 1.3, ex + R * 1.3, cy + R * 1.3, fill=_apagar(self.colores[0], 0.4), outline="", tags="fx")
+            c.create_oval(ex - R, cy - R, ex + R, cy + R, fill="#0c0508", outline=self.colores[0], width=4, tags="fx")
         elif t < CARGA + DISPARO + IMPACTO:
             p = (t - CARGA - DISPARO) / IMPACTO
             fx = ox + d * 300
@@ -390,3 +446,33 @@ class EfectoHabilidad:
             _destello(c, ex, hy, p, 52)
             _anillos(c, ex, hy, p, [self.colores[0], self.colores[1], "#ffffff"], 190)
             _rayos(c, ex, hy, p, self.colores[1], 16)
+
+    def _fx_rayo(self, c, t, ox, oy):
+        d = self.direccion
+        x0, y0 = ox + d * 52, oy + 4
+        largo = 430
+        if t < CARGA:
+            return
+        if t < CARGA + DISPARO:
+            q = (t - CARGA) / DISPARO
+            L = largo * _ease(min(1.0, q * 5))
+            grosor = 1.0 if q < 0.65 else max(0.0, 1 - (q - 0.65) / 0.35)
+            x1 = x0 + d * L
+            for h, color, k in ((42, self.colores[2], 0.45), (26, self.colores[0], 1.0), (11, "#ffffff", 1.0)):
+                hh = h * grosor
+                if hh < 1:
+                    continue
+                c.create_polygon([x0, y0 - hh / 2, x1, y0 - hh * 0.38, x1 + d * 12, y0, x1, y0 + hh * 0.38, x0, y0 + hh / 2],
+                                 fill=_apagar(color, k), outline="", tags="fx")
+            for _ in range(7):
+                sx = x0 + d * random.uniform(0, L)
+                sy = y0 + random.uniform(-26, 26) * grosor
+                r = random.uniform(2, 4)
+                c.create_oval(sx - r, sy - r, sx + r, sy + r, fill=_apagar(self.colores[1], 0.9), outline="", tags="fx")
+            _destello(c, x0, y0, q * 3, 30)
+        elif t < CARGA + DISPARO + IMPACTO:
+            p = (t - CARGA - DISPARO) / IMPACTO
+            ex = x0 + d * largo
+            _destello(c, ex, y0, p, 36)
+            _anillos(c, ex, y0, p, [self.colores[0], self.colores[1], self.colores[2]], 170)
+            _rayos(c, ex, y0, p, self.colores[1], 12)

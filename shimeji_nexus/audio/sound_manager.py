@@ -33,7 +33,7 @@ def _generar_wav(frecuencias, ruta, duracion_nota=0.12, sample_rate=44100):
         wf.writeframes(struct.pack(f"<{len(muestras)}h", *muestras))
 
 
-FORMAS_HABILIDAD = ("orbitar", "brasas", "espiral")
+FORMAS_HABILIDAD = ("orbitar", "brasas", "espiral", "rayo")
 
 
 def _generar_habilidad(forma, ruta, sr=22050):
@@ -54,6 +54,9 @@ def _generar_habilidad(forma, ruta, sr=22050):
                 env = rnd.uniform(0.5, 1.0)
             env *= 0.85
             m[i] = env * (rnd.random() * 2 - 1) + 0.35 * t * math.sin(2 * math.pi * 55 * i / sr)
+        elif forma == "rayo":
+            fase += 2 * math.pi * (250 + 1500 * t ** 2) / sr
+            m[i] = (0.3 + 0.5 * t) * (math.sin(fase) + 0.3 * math.sin(3 * fase))
         else:
             fase += 2 * math.pi * (260 + 600 * t) * (1 + 0.06 * math.sin(2 * math.pi * 14 * i / sr)) / sr
             m[i] = (0.35 + 0.45 * t) * math.sin(fase)
@@ -66,6 +69,9 @@ def _generar_habilidad(forma, ruta, sr=22050):
         elif forma == "brasas":
             lp += 0.08 * (ruido - lp)
             m[carga + j] = 2.2 * lp * math.exp(-2.0 * t) + 0.9 * math.sin(2 * math.pi * 55 * t) * math.exp(-3.0 * t)
+        elif forma == "rayo":
+            m[carga + j] = (0.8 * math.sin(2 * math.pi * (900 + 2000 * math.exp(-6 * t)) * t) * math.exp(-2.5 * t)
+                            + 0.6 * ruido * math.exp(-8 * t) + 0.5 * math.sin(2 * math.pi * 90 * t) * math.exp(-4 * t))
         else:
             m[carga + j] = (0.8 * math.sin(2 * math.pi * (140 - 80 * min(t, 1)) * t) * math.exp(-4.0 * t)
                             + 0.7 * ruido * math.exp(-6 * t) + 0.2 * math.sin(2 * math.pi * 900 * t) * math.exp(-3.0 * t))

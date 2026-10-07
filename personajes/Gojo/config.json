@@ -6,7 +6,7 @@
         "caminando": "caminando.png",
         "saludo": "saludo.png"
     },
-    "imagen": "quieto.png",
+    "imagen": "retrato.png",
     "saludo": "Yo soy el más fuerte~",
     "color_globo": "#E3F2FD",
     "color_texto": "#0D47A1",
@@ -142,7 +142,21 @@
                 "anim/magia_3.png",
                 "anim/magia_4.png"
             ],
-            "fps": 8
+            "fps": 8,
+            "tiempos": [
+                8,
+                18,
+                28,
+                50
+            ]
         }
+    },
+    "chat": {
+        "fuente": "Bahnschrift",
+        "tam": 10,
+        "adorno": "∞",
+        "forma": "redondeada",
+        "borde": "doble",
+        "esquina": 8
     }
 }

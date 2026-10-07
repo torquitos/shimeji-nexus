@@ -53,19 +53,51 @@ def _quitar_fondo(img_rgb, tolerancia=70):
         ImageChops.multiply(r.point(lambda v: 255 if v == 255 else 0), g.point(lambda v: 255 if v == 0 else 0)),
         b.point(lambda v: 255 if v == 255 else 0),
     )
+    if fondo[1] > 150 and fondo[0] < 110 and fondo[2] < 110:
+        # huecos cerrados de fondo verde (entre el brazo y el cuerpo): no se alcanzan desde el borde
+        rv, gv, bv = img_rgb.split()
+        verde_fuerte = ImageChops.subtract(gv, ImageChops.lighter(rv, bv)).point(lambda v: 255 if v > 110 else 0)
+        es_fondo = ImageChops.lighter(es_fondo, verde_fuerte)
     # Quita el borde de 1px claro que deja el reescalado entre el fondo y el contorno oscuro
     r0, g0, b0 = img_rgb.split()
     claro = ImageChops.darker(ImageChops.darker(r0, g0), b0).point(lambda v: 255 if v > 150 else 0)
     cerca_fondo = es_fondo.filter(ImageFilter.MaxFilter(3))
     es_fondo = ImageChops.lighter(es_fondo, ImageChops.multiply(cerca_fondo, claro))
     salida = img_rgb.convert("RGBA")
+    if fondo[1] > 150 and fondo[0] < 110 and fondo[2] < 110:
+        # fondo verde: el borde conserva un reflejo verde; el verde no puede pasar del mayor entre rojo y azul
+        borde = ImageChops.multiply(es_fondo.filter(ImageFilter.MaxFilter(5)), ImageChops.invert(es_fondo))
+        rr, gg, bb, aa = salida.split()
+        gg = Image.composite(ImageChops.darker(gg, ImageChops.lighter(rr, bb)), gg, borde)
+        salida = Image.merge("RGBA", (rr, gg, bb, aa))
     salida.putalpha(ImageChops.invert(es_fondo))
     return salida
 
 
+def _con_transparencia(img):
+    return img.mode == "RGBA" and img.getchannel("A").getextrema()[0] < 255
+
+
+def _redimensionar_rgba(img, tam):
+    """Ampliar: primero a un multiplo entero (cada pixel queda del mismo tamano) y luego se ajusta
+    al tamano final, asi no quedan bordes escalonados. Reducir: promedio por area."""
+    if tam[1] > img.height:
+        k = -(-tam[1] // img.height)
+        img = img.resize((img.width * k, img.height * k), Image.Resampling.NEAREST)
+    return img.convert("RGBa").resize(tam, Image.Resampling.BOX).convert("RGBA")
+
+
+def _recorte_alfa(img):
+    return img.crop(img.getchannel("A").point(lambda v: 255 if v > 0 else 0).getbbox())
+
+
 def cargar_sprite(ruta_img, alto):
     """Sprite recortado al contenido, de la altura pedida y con fondo transparente."""
-    img = _recortar_contenido(Image.open(ruta_img).convert("RGB"))
+    original = Image.open(ruta_img)
+    if _con_transparencia(original):
+        img = _recorte_alfa(original)
+        return _redimensionar_rgba(img, (max(1, round(img.width * alto / img.height)), alto))
+    img = _recortar_contenido(original.convert("RGB"))
     ancho = max(1, round(img.width * alto / img.height))
     img = img.resize((ancho, alto), Image.Resampling.BOX)
     return _quitar_fondo(img)
@@ -73,7 +105,13 @@ def cargar_sprite(ruta_img, alto):
 
 def cargar_avatar(ruta_img, size):
     """Cabeza y torso del personaje en un cuadrado, para miniaturas."""
-    img = _recortar_contenido(Image.open(ruta_img).convert("RGB"))
+    original = Image.open(ruta_img)
+    if _con_transparencia(original):
+        img = _recorte_alfa(original)
+        lado = min(img.width, img.height)
+        x0 = (img.width - lado) // 2
+        return _redimensionar_rgba(img.crop((x0, 0, x0 + lado, lado)), (size, size))
+    img = _recortar_contenido(original.convert("RGB"))
     lado = min(img.width, img.height)
     x0 = (img.width - lado) // 2
     img = img.crop((x0, 0, x0 + lado, lado)).resize((size, size), Image.Resampling.BOX)

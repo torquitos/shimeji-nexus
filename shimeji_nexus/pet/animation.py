@@ -15,6 +15,7 @@ class AnimationEngine:
         self.frames_cache = self._cargar_frames(ruta_personaje, config)
         self.anim = self._cargar_animaciones(ruta_personaje, config)
         self.indice_magia = 0
+        self.tiempos_magia = list(((config.get("animaciones") or {}).get("magia") or {}).get("tiempos") or [8, 18, 28, 50])
 
     def _abrir_imagen(self, path):
         img = Image.open(path).convert("RGBA")
@@ -58,23 +59,49 @@ class AnimationEngine:
                     frames.append(Image.open(os.path.join(ruta, archivo)).convert("RGBA"))
                 except OSError:
                     continue
+            frames = [self._ajustar(f) for f in frames]
             if frames:
                 anim[estado] = {
+                    "pil": frames,
                     "der": [ImageTk.PhotoImage(f) for f in frames],
                     "izq": [ImageTk.PhotoImage(ImageOps.mirror(f)) for f in frames],
                     "fps": float(datos.get("fps", 8)),
                 }
         return anim
 
-    def _frame_de_secuencia(self, estado):
+    def _ajustar(self, img):
+        """Los frames se guardan en su resolucion original; aqui se llevan al tamano de la mascota.
+        Reducir conserva los pixeles duros; ampliar usa un filtro suave para no mostrar bloques."""
+        if img.width == self.tamano:
+            return img
+        if img.width > self.tamano:
+            return img.resize((self.tamano, self.tamano), Image.Resampling.NEAREST)
+        return img.convert("RGBa").resize((self.tamano, self.tamano), Image.Resampling.BICUBIC).convert("RGBA")
+
+    def _seleccion(self, estado):
         nombre = estado if estado in self.anim else self.ALIAS.get(estado, "quieto")
         datos = self.anim.get(nombre) or self.anim.get("quieto")
         if not datos:
+            return None, None
+        n = len(datos["der"])
+        idx = min(self.indice_magia, n - 1) if nombre == "magia" else int(time.time() * datos["fps"]) % n
+        return datos, idx
+
+    def _frame_de_secuencia(self, estado):
+        datos, idx = self._seleccion(estado)
+        if datos is None:
             return None
-        lista = datos["der"] if self.direccion == 1 else datos["izq"]
-        if nombre == "magia":
-            return lista[min(self.indice_magia, len(lista) - 1)]
-        return lista[int(time.time() * datos["fps"]) % len(lista)]
+        return (datos["der"] if self.direccion == 1 else datos["izq"])[idx]
+
+    def silueta_actual(self, estado):
+        """Mascara (canal alfa) del frame que se esta mostrando, o None si no hay animacion por frames."""
+        if not self.anim:
+            return None
+        datos, idx = self._seleccion(estado)
+        if datos is None:
+            return None
+        alfa = datos["pil"][idx].getchannel("A")
+        return alfa if self.direccion == 1 else ImageOps.mirror(alfa)
 
     def fase_caminata(self):
         """Posicion (0 a 1) dentro del ciclo de pasos; solo si el personaje tiene caminata animada."""

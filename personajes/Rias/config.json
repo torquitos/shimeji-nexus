@@ -6,7 +6,7 @@
         "caminando": "caminando.png",
         "saludo": "saludo.png"
     },
-    "imagen": "rias.png",
+    "imagen": "retrato.png",
     "saludo": "Presidenta Rias. Clic derecho para opciones.",
     "color_globo": "#FFF0F5",
     "color_texto": "#8B0000",
@@ -101,5 +101,64 @@
             "#ff6a4d",
             "#b0102a"
         ]
+    },
+    "animaciones": {
+        "caminando": {
+            "frames": [
+                "anim/caminando_0.png",
+                "anim/caminando_1.png",
+                "anim/caminando_2.png",
+                "anim/caminando_3.png",
+                "anim/caminando_4.png",
+                "anim/caminando_5.png",
+                "anim/caminando_6.png"
+            ],
+            "fps": 8,
+            "velocidad": 4.0
+        },
+        "quieto": {
+            "frames": [
+                "anim/quieto_0.png",
+                "anim/quieto_1.png",
+                "anim/quieto_2.png",
+                "anim/quieto_3.png"
+            ],
+            "fps": 3
+        },
+        "saludo": {
+            "frames": [
+                "anim/saludo_0.png",
+                "anim/saludo_1.png",
+                "anim/saludo_2.png",
+                "anim/saludo_3.png"
+            ],
+            "fps": 6
+        },
+        "magia": {
+            "frames": [
+                "anim/magia_0.png",
+                "anim/magia_1.png",
+                "anim/magia_2.png",
+                "anim/magia_3.png",
+                "anim/magia_4.png",
+                "anim/magia_5.png"
+            ],
+            "fps": 8,
+            "tiempos": [
+                6,
+                14,
+                28,
+                33,
+                50
+            ]
+        }
+    },
+    "chat": {
+        "fuente": "Georgia",
+        "tam": 10,
+        "adorno": "✦",
+        "forma": "redondeada",
+        "borde": "doble",
+        "esquina": 16
     }
 }

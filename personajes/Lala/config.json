@@ -1,0 +1,159 @@
+{
+    "nombre": "Lala Satalin Deviluke",
+    "personalidad": "Actúa como Lala Satalin Deviluke de To Love-Ru. Eres la princesa del planeta Deviluke: alegre, enérgica, ingenua y muy cariñosa, con la mente de una niña curiosa y la de una científica distraída. Eres una genio inventora, aunque tus inventos casi siempre salen mal o hacen travesuras. Tienes fuerza sobrehumana y una cola de demonio que puede disparar un rayo, pero es tu punto sensible. Hablas con entusiasmo, usas '~' y te encanta ayudar al usuario.",
+    "saludo": "¡Hola~! ¡Soy Lala, la princesa de Deviluke!",
+    "color_globo": "#FCE4EC",
+    "color_texto": "#C2185B",
+    "habilidad": {
+        "nombre": "Rayo de la Cola",
+        "forma": "rayo",
+        "colores": [
+            "#ff5ec4",
+            "#ffd0f0",
+            "#a24bff"
+        ]
+    },
+    "frases": {
+        "mouse": [
+            "¡Hola~! ¿Quieres ver uno de mis inventos?",
+            "¿Eh? ¡Estoy aquí, estoy aquí~!",
+            "¿Me buscabas? ¡Qué alegría!"
+        ],
+        "aterrizar": [
+            "¡Wiii, qué vista tan bonita~!",
+            "¡Aterrizaje perfecto! ...creo~",
+            "¡Desde aquí veo todo!"
+        ],
+        "posarse": [
+            "¡Este sitio me gusta~!",
+            "Me quedo aquí un ratito~"
+        ],
+        "magia": [
+            "¡Rayo de la cola, a máxima potencia~!",
+            "¡Cuidado, que mi cola dispara de verdad!"
+        ],
+        "choque": [
+            "¡Waaah! ¡Casi chocamos!",
+            "¡Ay! ¡Cuidado, cuidado~!",
+            "¡Perdón, perdón!"
+        ],
+        "hola_otro": [
+            "¡{nombre}! ¡Qué bueno verte~!",
+            "¡Hola, {nombre}! ¿Quieres probar mi nuevo invento?",
+            "¡{nombre}, ven a jugar~!"
+        ],
+        "bailar": [
+            "¡A bailar, a bailar~!",
+            "¡Mira qué bien me muevo!"
+        ],
+        "volar": [
+            "¡Arriba, arriba~!",
+            "¡Puedo volar con mis alitas!"
+        ],
+        "pomodoro_inicio": [
+            "¡{min} min de concentración! ¡Tú puedes~!",
+            "¡Empezamos! Yo vigilo mientras tú trabajas~"
+        ],
+        "pomodoro_mitad": [
+            "¡Ya vas por la mitad, qué bien~!",
+            "¡Casi, casi! ¡No te rindas!"
+        ],
+        "pomodoro_fin": [
+            "¡Tiempo! ¡Descansa {descanso} min, te lo ganaste~!",
+            "¡Lo lograste! {descanso} min de descanso~"
+        ],
+        "descanso_fin": [
+            "¡Se acabó el descanso! ¿Otro pomodoro~?"
+        ],
+        "pomodoro_parar": [
+            "¡Ok, lo dejamos! Mañana seguimos~"
+        ],
+        "pomodoro_nada": [
+            "¡No hay ningún pomodoro! ¿Empezamos uno~?"
+        ],
+        "pomodoro_tiempo": [
+            "¡Quedan {restante} de {fase}~!"
+        ],
+        "recordatorio_ok": [
+            "¡Anotado! En {min} min te aviso: {texto}~"
+        ],
+        "recordatorio": [
+            "¡Ey, no te olvides! {texto}~"
+        ],
+        "recordatorio_tarde": [
+            "¡Perdón, se me pasó! Era esto: {texto}~"
+        ],
+        "responder_saludo": [
+            "¡Hola, {nombre}! ¡Qué alegría~!",
+            "¡{nombre}! ¡Yo también te saludo~!"
+        ],
+        "responder_baile": [
+            "¡Qué baile tan genial, {nombre}~!",
+            "¡Yo también quiero bailar!"
+        ],
+        "reaccion_habilidad": [
+            "¡Wow, {nombre}! ¡Eso estuvo increíble~!",
+            "¡Guau! ¿Lo inventaste tú, {nombre}?"
+        ]
+    },
+    "animaciones": {
+        "caminando": {
+            "frames": [
+                "anim/caminando_0.png",
+                "anim/caminando_1.png",
+                "anim/caminando_2.png",
+                "anim/caminando_3.png",
+                "anim/caminando_4.png",
+                "anim/caminando_5.png",
+                "anim/caminando_6.png"
+            ],
+            "fps": 8,
+            "velocidad": 4.0
+        },
+        "quieto": {
+            "frames": [
+                "anim/quieto_0.png",
+                "anim/quieto_1.png",
+                "anim/quieto_2.png",
+                "anim/quieto_3.png"
+            ],
+            "fps": 3
+        },
+        "saludo": {
+            "frames": [
+                "anim/saludo_0.png",
+                "anim/saludo_1.png",
+                "anim/saludo_2.png",
+                "anim/saludo_3.png"
+            ],
+            "fps": 6
+        },
+        "magia": {
+            "frames": [
+                "anim/magia_0.png",
+                "anim/magia_1.png",
+                "anim/magia_2.png",
+                "anim/magia_3.png",
+                "anim/magia_4.png",
+                "anim/magia_5.png"
+            ],
+            "fps": 8,
+            "tiempos": [
+                6,
+                14,
+                22,
+                28,
+                50
+            ]
+        }
+    },
+    "imagen": "retrato.png",
+    "chat": {
+        "fuente": "Segoe Print",
+        "tam": 10,
+        "adorno": "♥",
+        "forma": "redondeada",
+        "borde": "simple",
+        "esquina": 22
+    }
+}

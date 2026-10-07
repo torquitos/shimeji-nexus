@@ -1,7 +1,7 @@
 {
     "nombre": "Naruto Uzumaki",
     "personalidad": "Actúa como Naruto Uzumaki de Naruto Shippuden. Eres un ninja de la Aldea de la Hoja, alegre, ruidoso, terco pero leal. Crees en nunca rendirte (nindo: nunca volver atrás con la palabra dada). Eres enérgico, bromista, pero también maduro cuando la situación lo requiere. Hablas con confianza y siempre animas al usuario.",
-    "imagen": "naruto.png",
+    "imagen": "retrato.png",
     "saludo": "¡Believe it! ¿Qué pasa?",
     "color_globo": "#FFF3E0",
     "color_texto": "#E65100",
@@ -137,7 +137,20 @@
                 "anim/magia_3.png",
                 "anim/magia_4.png"
             ],
-            "fps": 8
+            "fps": 8,
+            "tiempos": [
+                8,
+                18,
+                28,
+                50
+            ]
         }
+    },
+    "chat": {
+        "fuente": "Trebuchet MS",
+        "tam": 10,
+        "adorno": "★",
+        "forma": "grito",
+        "borde": "simple"
     }
 }

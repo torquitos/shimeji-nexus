@@ -14,8 +14,8 @@ import numpy as np
 from PIL import Image, ImageChops
 from scipy import ndimage
 
-COLUMNAS, FILAS, LADO = 8, 3, 200
-SUELO = LADO - 8
+COLUMNAS, FILAS, LADO = 8, 3, 256
+SUELO = LADO - 10
 
 ESTADOS = {
     "caminando": (0, range(0, 8), 8),
@@ -58,12 +58,18 @@ def recortar_celda(a, fondo, fila, col):
         sy, sx = (sl[0].start + sl[0].stop) // 2, (sl[1].start + sl[1].stop) // 2
         ancho_ok = (sl[1].stop - sl[1].start) < cw * 0.9 and (sl[0].stop - sl[0].start) < ch * 0.9
         # astilla de un efecto de la celda vecina: pequena y pegada al borde izquierdo o derecho
-        toca_borde = sl[1].start == 0 or sl[1].stop >= celda.shape[1]
+        toca_borde = sl[1].start == 0
         if toca_borde and np.sum(mascara & (etiquetas == i)) < 0.2 * np.sum(mascara & (etiquetas == mayor)):
             continue
         if ancho_ok and abs(sy - cy) < ch * 0.5 and abs(sx - cx) < cw * 0.7:
             cerca |= etiquetas == i
     final = mascara & cerca
+    if fondo[1] > 150:
+        # quita el reflejo verde del fondo en el borde: el verde no puede pasar del mayor entre rojo y azul
+        borde = final & ~ndimage.binary_erosion(final, iterations=2)
+        tope = np.maximum(celda[..., 0], celda[..., 2])
+        celda = celda.copy()
+        celda[..., 1] = np.where(borde & (celda[..., 1] > tope), tope, celda[..., 1])
     rgba = np.dstack([celda.astype(np.uint8), (final * 255).astype(np.uint8)])
     return Image.fromarray(rgba, "RGBA")
 
@@ -76,32 +82,42 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("hoja")
     ap.add_argument("personaje")
-    ap.add_argument("--alto", type=int, default=176, help="altura del personaje en el canvas de 200 px")
+    ap.add_argument("--alto", type=int, default=225, help="altura del personaje en el lienzo de 256 px (225 = casi la resolucion original)")
     ap.add_argument("--vel-caminar", type=float, default=4.0, help="pixeles por tick (35 ms) al caminar")
+    ap.add_argument("--magia-cols", default="0,1,2,3,4", help="celdas (0-7) de la fila 3 que forman la secuencia de la habilidad")
+    ap.add_argument("--tiempos", default="8,18,28,50", help="tick en que empieza cada frame de la habilidad despues del primero")
+    ap.add_argument("--solo", default="", help="procesar solo estos estados (ej. magia) y conservar los demas")
+    ap.add_argument("--fila-magia", type=int, default=2, help="fila (0-2) de la hoja donde esta la habilidad")
+    ap.add_argument("--escala", type=float, default=None, help="escala fija; si no se da, se calcula con los frames de reposo")
     args = ap.parse_args()
+    solo = {e for e in args.solo.split(",") if e}
+    ESTADOS["magia"] = (args.fila_magia, [int(c) for c in args.magia_cols.split(",")], 8)
+    estados = {k: v for k, v in ESTADOS.items() if not solo or k in solo}
 
     a = np.array(Image.open(args.hoja).convert("RGB")).astype(float)
     fondo = color_de_fondo(a)
     print("color de fondo detectado:", tuple(int(v) for v in fondo))
 
     celdas = {}
-    for estado, (fila, cols, _) in ESTADOS.items():
+    for estado, (fila, cols, _) in estados.items():
         for col in cols:
             img = recortar_celda(a, fondo, fila, col)
             if img is not None and caja_visible(img):
                 celdas[(estado, col)] = img
 
-    alturas = [caja_visible(celdas[("quieto", c)])[3] - caja_visible(celdas[("quieto", c)])[1] for c in range(4) if ("quieto", c) in celdas]
-    escala = args.alto / float(np.median(alturas))
-    print(f"escala unica: {escala:.3f} (altura de referencia {np.median(alturas):.0f}px)")
+    alturas = [1.0] if args.escala is not None else [caja_visible(celdas[("quieto", c)])[3] - caja_visible(celdas[("quieto", c)])[1] for c in range(4) if ("quieto", c) in celdas]
+    escala = args.escala if args.escala is not None else args.alto / float(np.median(alturas))
+    print(f"escala unica: {escala:.3f}")
 
     salida = os.path.join(args.personaje, "anim")
     os.makedirs(salida, exist_ok=True)
     for viejo in os.listdir(salida):
-        if viejo.endswith(".png"):
+        if viejo.endswith(".png") and (not solo or viejo.split("_")[0] in solo):
             os.remove(os.path.join(salida, viejo))
-    config = {}
-    for estado, (fila, cols, fps) in ESTADOS.items():
+    ruta_cfg = os.path.join(args.personaje, "config.json")
+    cfg = json.load(open(ruta_cfg, encoding="utf-8-sig"))
+    config = dict(cfg.get("animaciones") or {}) if solo else {}
+    for estado, (fila, cols, fps) in estados.items():
         frames = []
         for col in cols:
             img = celdas.get((estado, col))
@@ -136,11 +152,16 @@ def main():
             config[estado] = {"frames": archivos, "fps": fps}
             if estado == "caminando":
                 config[estado]["velocidad"] = args.vel_caminar
+            if estado == "magia":
+                config[estado]["tiempos"] = [int(t) for t in args.tiempos.split(",")]
         print(f"{estado}: {len(archivos)} frames")
 
-    ruta_cfg = os.path.join(args.personaje, "config.json")
-    cfg = json.load(open(ruta_cfg, encoding="utf-8-sig"))
     cfg["animaciones"] = config
+    if "imagen" not in cfg and ("quieto", 0) in celdas:
+        x0, y0, x1, y1 = caja_visible(celdas[("quieto", 0)])
+        celdas[("quieto", 0)].crop((max(0, x0 - 2), max(0, y0 - 2), x1 + 2, y1 + 2)).save(os.path.join(args.personaje, "retrato.png"))
+        cfg["imagen"] = "retrato.png"
+        print("retrato.png creado")
     json.dump(cfg, open(ruta_cfg, "w", encoding="utf-8"), indent=4, ensure_ascii=False)
     print("config.json actualizado")
 

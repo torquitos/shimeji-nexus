@@ -68,7 +68,8 @@ class MascotaLogica:
         self.reloj_id = self.canvas.create_text(self.tamano // 2, 10, text="", fill="#ffffff", font=("Segoe UI", 10, "bold"))
         self.reloj_fondo = self.canvas.create_rectangle(0, 0, 0, 0, fill="#16161D", outline="#3a3a4a", state="hidden")
         self.canvas.tag_lower(self.reloj_fondo, self.reloj_id)
-        self.efecto = EfectoHabilidad(self.canvas, self.sprite_canvas_id, self.tamano, self.habilidad, self.window, sprite_propio="magia" in self.animacion.anim)
+        self.efecto = EfectoHabilidad(self.canvas, self.sprite_canvas_id, self.tamano, self.habilidad, self.window, sprite_propio="magia" in self.animacion.anim,
+                                      silueta=lambda: self.animacion.silueta_actual(self.estado))
 
         # Menú contextual
         self.menu = tk.Menu(self.window, tearoff=0, bg="#16161D", fg="white", activebackground="#FF3366")
@@ -99,7 +100,7 @@ class MascotaLogica:
 
         nombre = self.config.get("nombre", "unknown")
         self.social = SocialBehavior(self.SHARED_DIR, nombre, self.voz)
-        self.chat = ChatBubble(self.window, self.config, self.x_pos, self.y_pos, on_estado_quieto=self._forzar_quieto, on_comando=self._comando)
+        self.chat = ChatBubble(self.window, self.config, self.x_pos, self.y_pos, on_estado_quieto=self._forzar_quieto, on_comando=self._comando, ruta=self.ruta_personaje)
 
         self.canvas.bind("<Button-1>", self.iniciar_arrastre)
         self.canvas.bind("<B1-Motion>", self.arrastrar)
@@ -234,7 +235,7 @@ class MascotaLogica:
 
         if self.estado == "magia" and self.efecto.t is not None:
             t = self.efecto.t
-            self.animacion.indice_magia = 0 if t < 8 else 1 if t < 18 else 2 if t < 28 else 3 if t < 50 else 4
+            self.animacion.indice_magia = sum(1 for limite in self.animacion.tiempos_magia if t >= limite)
         self.img_actual_tk = self.animacion.frame_actual(self.estado)
         self.canvas.itemconfig(self.sprite_canvas_id, image=self.img_actual_tk)
         balanceo = self.animacion.balanceo_x() if self.estado in ("caminando", "siguiendo") else 0
