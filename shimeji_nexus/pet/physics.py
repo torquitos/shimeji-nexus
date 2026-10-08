@@ -3,18 +3,30 @@ import ctypes.wintypes
 
 import pygetwindow as gw
 
+from shimeji_nexus.core import pantallas
+
 
 class PhysicsEngine:
     """Suelo, caída y detección de ventanas para que la mascota se pueda sentar encima."""
 
-    def __init__(self, tamano, screen_width, screen_height):
+    def __init__(self, tamano):
         self.tamano = tamano
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.suelo_fijo = screen_height - (tamano + 40)
+        self.area = pantallas.area_en(0, 0)  # el monitor principal contiene el origen
         self.suelo_actual = self.suelo_fijo
         self.ultima_ventana = None
         self.contador_ventana = 0
+
+    @property
+    def suelo_fijo(self):
+        """Y de la ventana de la mascota cuando esta parada en el fondo del monitor en que esta."""
+        return self.area.bottom - (self.tamano + 40)
+
+    def actualizar_monitor(self, x_pos, y_pos):
+        """Cambia de monitor cuando el centro de la mascota pasa a otro; cada uno tiene su propio suelo."""
+        nuevo = pantallas.area_en(x_pos + self.tamano / 2, y_pos + self.tamano / 2)
+        if nuevo != self.area:
+            self.area = nuevo
+            self.suelo_actual = self.suelo_fijo
 
     def ventana_para_sentarse(self, x_pos, y_pos, margen_extra=0):
         """Busca una ventana cuyo borde superior esté cerca de los pies de la mascota.
@@ -45,10 +57,11 @@ class PhysicsEngine:
 
     def actualizar_suelo(self, x_pos, y_pos):
         """Recalcula suelo_actual según ventanas cercanas. Devuelve (aterrizo_en_ventana_nueva)."""
+        self.actualizar_monitor(x_pos, y_pos)
         ventana_bajo = self.ventana_para_sentarse(x_pos, y_pos, margen_extra=200)
         if ventana_bajo:
             borde = ventana_bajo.top - self.tamano - 5
-            if 0 < borde < self.suelo_fijo:
+            if self.area.top < borde < self.suelo_fijo:
                 self.suelo_actual = borde
                 if ventana_bajo != self.ultima_ventana:
                     self.contador_ventana = 20
@@ -64,7 +77,7 @@ class PhysicsEngine:
         ventana = self.ventana_para_sentarse(x_pos, y_pos, margen_extra=margen_extra)
         if ventana:
             borde = ventana.top - self.tamano - 5
-            if 0 < borde < self.suelo_fijo:
+            if self.area.top < borde < self.suelo_fijo:
                 self.suelo_actual = borde
                 self.ultima_ventana = ventana
                 self.contador_ventana = 20
@@ -72,7 +85,7 @@ class PhysicsEngine:
         return None
 
     def clamp_posicion(self, y_pos):
-        if y_pos > self.suelo_fijo + 50 or y_pos < -200:
+        if y_pos > self.suelo_fijo + 50 or y_pos < self.area.top - 200:
             return self.suelo_fijo
         return y_pos
 

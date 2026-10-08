@@ -100,7 +100,8 @@
             "#5b9bd9",
             "#9b59eb",
             "#7a5cff"
-        ]
+        ],
+        "descripcion": "Funde el Azul y el Rojo en una esfera de vacío que borra todo lo que toca."
     },
     "animaciones": {
         "caminando": {

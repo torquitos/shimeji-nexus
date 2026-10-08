@@ -95,7 +95,8 @@
             "#4aa8ff",
             "#bfe6ff",
             "#1f5fbf"
-        ]
+        ],
+        "descripcion": "Esfera de chakra giratoria que arrasa con todo lo que golpea."
     },
     "animaciones": {
         "caminando": {

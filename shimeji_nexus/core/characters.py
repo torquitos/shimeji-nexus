@@ -2,6 +2,7 @@ import json
 import os
 import re
 
+from shimeji_nexus.pet.habilidades.config import cargar_habilidad
 from shimeji_nexus.ui.theme import ACCENT_DEFAULT, acento_desde_color_texto, blend_color
 
 
@@ -40,6 +41,7 @@ def escanear(ruta_personajes, on_carpeta=None):
             "imagen": data.get("imagen", "rias.png"),
             "serie": serie, "bio": bio,
             "saludo": data.get("saludo", ""),
+            "habilidad": cargar_habilidad(data),
             "color_globo": data.get("color_globo"),
             "color_texto": color_texto_raw,
             "color_acento": color_acento,

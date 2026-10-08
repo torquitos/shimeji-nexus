@@ -100,7 +100,8 @@
             "#e0364d",
             "#ff6a4d",
             "#b0102a"
-        ]
+        ],
+        "descripcion": "Una esfera de pura destrucción que desintegra todo a su paso."
     },
     "animaciones": {
         "caminando": {

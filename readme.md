@@ -95,11 +95,20 @@ Mascotas/
 │   ├── core/                 # paths, settings, logging, escaneo de personajes
 │   ├── ai/                   # cliente de IA multi-provider (Gemini/OpenAI/OpenRouter)
 │   ├── audio/                # generación y reproducción de sonidos
-│   ├── pet/                  # motor de la mascota flotante (animación, física, social, chat)
-│   ├── ui/                   # launcher, ventana de configuración, agregar personaje
+│   ├── pet/                  # motor de la mascota flotante
+│   │   ├── pet.py            #   clase MascotaLogica: ventana, bucle y arranque
+│   │   ├── movimiento.py     #   un tick: mirar al mouse, caer, caminar, seguir
+│   │   ├── comandos.py       #   pomodoro, recordatorios y comandos del chat
+│   │   ├── acciones.py       #   arrastrar, menú, habilidad, respuestas, salir
+│   │   ├── animation.py / physics.py / social.py / chat_ui.py
+│   │   └── habilidades/      #   config, util, lienzo, aura, formas (efectos), efecto
+│   ├── ui/                   # ventanas de la app
+│   │   ├── launcher/         #   app, sidebar, hero, procesos
+│   │   └── settings_window.py / add_character_window.py / preview.py / theme.py
 │   └── ipc/                  # estado compartido entre mascotas
 ├── requirements.txt         # Dependencias
-├── personajes/               # Carpetas de personajes (Gojo, Rias, naruto/)
+├── herramientas/             # preparar_sprites.py: hoja de sprites -> frames del personaje
+├── personajes/               # Carpetas de personajes (Gojo, Rias, Naruto, Lala)
 ├── assets/sounds/             # Archivos de sonido generados
 ├── shared_state/              # Estado compartido para interacción entre mascotas
 └── .env                      # Configuración de API keys (no se sube a git)

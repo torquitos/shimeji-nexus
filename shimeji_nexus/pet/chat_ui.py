@@ -9,8 +9,9 @@ from PIL import ImageTk
 
 from shimeji_nexus.ai import client as ai_manager
 from shimeji_nexus.audio import sound_manager
-from shimeji_nexus.core import image_utils
+from shimeji_nexus.core import image_utils, pantallas
 from shimeji_nexus.ui import theme
+from shimeji_nexus.ui.formas import contorno_redondeado as _contorno_redondeado
 
 ESTILO_DEFECTO = {"fuente": "Segoe UI", "tam": 10, "adorno": "", "forma": "redondeada", "borde": "simple", "esquina": 14}
 
@@ -18,10 +19,6 @@ PAD = 14
 MAXW = 230
 COLA = 14
 MARGEN = 12
-
-
-def _contorno_redondeado(x1, y1, x2, y2, r):
-    return [x1 + r, y1, x2 - r, y1, x2, y1, x2, y1 + r, x2, y2 - r, x2, y2, x2 - r, y2, x1 + r, y2, x1, y2, x1, y2 - r, x1, y1 + r, x1, y1]
 
 
 def _contorno_grito(x1, y1, x2, y2, paso=13, salto=6):
@@ -145,10 +142,10 @@ class ChatBubble:
         self._reposicionar()
 
     def _reposicionar(self):
-        sw = self.window.winfo_screenwidth()
+        area = pantallas.area_en(self.x_pos + 100, self.y_pos + 100)
         x = int(self.x_pos + 100 - self._ancho / 2)
-        x = max(0, min(sw - self._ancho, x))
-        y = max(0, int(self.y_pos + 10 - self._alto))
+        x = max(area.left, min(area.right - self._ancho, x))
+        y = max(area.top, int(self.y_pos + 10 - self._alto))
         self.globo.geometry(f"+{x}+{y}")
 
     def actualizar_posicion(self, x_pos, y_pos):

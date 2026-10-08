@@ -26,7 +26,12 @@ def _capa(ancho, alto, color):
     return Image.new("RGB", (ancho, alto), color)
 
 
-def componer_hero(sprite, color_acento, ancho, alto, marca):
+def posicion_sprite(sprite, ancho, alto):
+    """Esquina superior izquierda donde va el sprite en la portada."""
+    return int(ancho * 0.70) - sprite.width // 2, alto - sprite.height - 34
+
+
+def componer_hero(sprite, color_acento, ancho, alto, marca, con_sprite=True):
     """Portada del personaje: resplandor de su color, nombre como marca de agua,
     el sprite grande a la derecha con sombra, y oscurecido a la izquierda para el texto."""
     base = _capa(ancho, alto, theme.BG)
@@ -51,12 +56,28 @@ def componer_hero(sprite, color_acento, ancho, alto, marca):
     base = Image.composite(_capa(ancho, alto, theme.BG), base, izquierda.point(lambda v: int(max(0.0, 1 - v / 140) * 170)))
 
     if sprite is not None:
-        x = cx - sprite.width // 2
-        y = alto - sprite.height - 34
+        x, y = posicion_sprite(sprite, ancho, alto)
         sombra = Image.new("L", (ancho, alto), 0)
         rx, ry, cys = int(sprite.width * 0.45), 12, y + sprite.height - 4
         ImageDraw.Draw(sombra).ellipse((cx - rx, cys - ry, cx + rx, cys + ry), fill=190)
         sombra = sombra.filter(ImageFilter.GaussianBlur(9))
         base = Image.composite(_capa(ancho, alto, (4, 4, 8)), base, sombra)
-        base.paste(sprite, (x, y), sprite)
+        if con_sprite:
+            base.paste(sprite, (x, y), sprite)
     return base
+
+
+def emblema(colores, tam=84):
+    """Emblema de una tecnica: nucleo luminoso y anillos con los colores de su energia (dibujado 4x y reducido)."""
+    k = 4
+    n = tam * k
+    img = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    brillo = Image.radial_gradient("L").resize((n, n), Image.Resampling.BICUBIC).point(lambda v: int(150 * ((255 - v) / 255) ** 1.6))
+    img.paste(Image.new("RGBA", (n, n), colores[0]), (0, 0), brillo)
+    d = ImageDraw.Draw(img)
+    for inset, relleno, borde, ancho in ((0.10, colores[2], colores[0], 3), (0.26, colores[0], colores[1], 2), (0.40, colores[1], None, 0)):
+        m = int(n * inset)
+        d.ellipse((m, m, n - m, n - m), fill=relleno, outline=borde, width=ancho * k)
+    m = int(n * 0.44)
+    d.ellipse((m, m, int(n * 0.54), int(n * 0.54)), fill="#ffffff")
+    return img.resize((tam, tam), Image.Resampling.LANCZOS)
