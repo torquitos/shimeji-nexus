@@ -52,14 +52,20 @@ class AccionesMixin:
         self.estado = "arrastrando"
         self.x_mouse = event.x
         self.y_mouse = event.y
+        self._arrastro = False
 
     def arrastrar(self, event):
+        self._arrastro = True
         self.x_pos = self.window.winfo_x() + (event.x - self.x_mouse)
         self.y_pos = self.window.winfo_y() + (event.y - self.y_mouse)
         self.window.geometry(f"+{self.x_pos}+{int(self.y_pos)}")
         self.chat.actualizar_posicion(self.x_pos, self.y_pos)
 
     def soltar(self, event):
+        if not self._arrastro and not self.config.get("habla", True):
+            self.estado, self.pasos_restantes = "saludo", 24
+            self.mostrar_comentario_autonomo(random.choice(("Prrr...", "*ronronea*", "Miau~", "*cierra los ojos feliz*")))
+            return
         nuevo_y = self.fisica.sentarse_en_ventana_cercana(self.x_pos, self.y_pos, margen_extra=100)
         if nuevo_y is not None:
             self.y_pos = nuevo_y

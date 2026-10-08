@@ -1,4 +1,9 @@
+import hashlib
+import os
+
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
+
+from shimeji_nexus.core.paths import base_dir
 
 _MARCADOR = (255, 0, 255)
 
@@ -91,6 +96,30 @@ def _recorte_alfa(img):
     return img.crop(img.getchannel("A").point(lambda v: 255 if v > 0 else 0).getbbox())
 
 
+def _con_cache(funcion):
+    """Quitar el fondo de una imagen es lo mas lento de abrir la app: el resultado se guarda en disco
+    y solo se rehace si cambia la imagen original."""
+    def envuelta(ruta_img, medida):
+        try:
+            clave = f"{funcion.__name__}|{os.path.abspath(ruta_img)}|{os.path.getmtime(ruta_img)}|{medida}|2"
+            destino = os.path.join(base_dir(), "cache", hashlib.md5(clave.encode()).hexdigest() + ".png")
+            if os.path.exists(destino):
+                return Image.open(destino).convert("RGBA")
+        except OSError:
+            destino = None
+        img = funcion(ruta_img, medida)
+        if destino:
+            try:
+                os.makedirs(os.path.dirname(destino), exist_ok=True)
+                img.save(destino)
+            except OSError:
+                pass
+        return img
+    envuelta.__name__ = funcion.__name__
+    return envuelta
+
+
+@_con_cache
 def cargar_sprite(ruta_img, alto):
     """Sprite recortado al contenido, de la altura pedida y con fondo transparente."""
     original = Image.open(ruta_img)
@@ -103,6 +132,7 @@ def cargar_sprite(ruta_img, alto):
     return _quitar_fondo(img)
 
 
+@_con_cache
 def cargar_avatar(ruta_img, size):
     """Cabeza y torso del personaje en un cuadrado, para miniaturas."""
     original = Image.open(ruta_img)

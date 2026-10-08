@@ -3,6 +3,7 @@ import random
 import time
 
 from shimeji_nexus.core import pantallas
+from shimeji_nexus.pet.habilidades.zoomies import ARRANQUE, FIN_CARRERA
 
 
 class MovimientoMixin:
@@ -46,9 +47,6 @@ class MovimientoMixin:
                 self.estado = "caminando"
                 self.animacion.direccion = random.choice([1, -1])
                 self.pasos_restantes = random.randint(30, 80)
-            elif rand > 0.985:
-                self.estado = "flotando"
-                self.pasos_restantes = 60
 
     def _mover(self, vel_mult, particulas_on):
         offset_y = 0
@@ -90,6 +88,8 @@ class MovimientoMixin:
         elif self.estado == "flotando" or self.estado == "magia":
             offset_y = self.animacion.offset_y_para_estado(self.estado)
             if self.estado == "magia":
+                if self.habilidad["forma"] == "zoomies":
+                    offset_y = self._correr_zoomies()
                 if particulas_on:
                     self.generar_efecto_aura()
                 self.pasos_restantes -= 1
@@ -100,6 +100,19 @@ class MovimientoMixin:
                 if self.pasos_restantes <= 0:
                     self.estado = "quieto"
         return offset_y
+
+    def _correr_zoomies(self):
+        """Durante la carrera de los zoomies el gato cruza la pantalla de verdad, a saltitos, y rebota en los bordes."""
+        t = self.efecto.t
+        if t is None or not ARRANQUE <= t < FIN_CARRERA:
+            return 0
+        izquierda, derecha = pantallas.limites_x()
+        self.x_pos += 15 * self.animacion.direccion
+        if self.x_pos < izquierda or self.x_pos > derecha - self.tamano:
+            self.x_pos = max(izquierda, min(self.x_pos, derecha - self.tamano))
+            self.animacion.direccion *= -1
+            self.efecto.direccion = self.animacion.direccion
+        return abs(math.sin(t * 0.55)) * 16
 
     def _dibujar_sprite(self):
         if self.estado == "magia" and self.efecto.t is not None:

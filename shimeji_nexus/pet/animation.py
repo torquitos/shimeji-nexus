@@ -2,7 +2,7 @@ import math
 import os
 import time
 
-from PIL import Image, ImageOps, ImageTk
+from PIL import Image, ImageChops, ImageOps, ImageTk
 
 
 class AnimationEngine:
@@ -19,11 +19,11 @@ class AnimationEngine:
 
     def _abrir_imagen(self, path):
         img = Image.open(path).convert("RGBA")
-        if any(p[3] < 255 for p in img.getdata()):
+        if img.getchannel("A").getextrema()[0] < 255:
             return img.resize((self.tamano, self.tamano), Image.Resampling.NEAREST)
-        datas = list(img.getdata())
-        newData = [(0, 0, 0, 0) if (p[0] > 240 and p[1] > 240 and p[2] > 240) else p for p in datas]
-        img.putdata(newData)
+        r, g, b, _ = img.split()
+        blanco = ImageChops.darker(ImageChops.darker(r, g), b).point(lambda v: 255 if v > 240 else 0)
+        img = Image.composite(Image.new("RGBA", img.size, (0, 0, 0, 0)), img, blanco)
         return img.resize((self.tamano, self.tamano), Image.Resampling.NEAREST)
 
     def _precalcular_par(self, img):

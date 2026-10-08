@@ -22,7 +22,57 @@ FRASES_DEFECTO = {
     "recordatorio_ok": ["Anotado, te aviso en {min} min: {texto}"],
     "recordatorio": ["Recordatorio: {texto}"],
     "recordatorio_tarde": ["Se te pasó esto: {texto}"],
+    "reac_codigo": ["Qué buen código. Sigue así.", "Programando, ¿eh? Concentración total."],
+    "reac_video": ["¿Qué estás viendo? Se ve interesante.", "Un descanso con videos, te lo mereces."],
+    "reac_juego": ["¡A jugar! Diviértete.", "Que gane el mejor. ¡Suerte!"],
+    "reac_chat": ["Saluda a quien esté al otro lado de mi parte.", "Hablando con alguien, ¿eh?"],
+    "reac_doc": ["Ese documento va quedando muy bien.", "Qué aplicado estás hoy."],
+    "reac_musica": ["Buena música.", "Qué buena canción, sube el volumen."],
+    "reac_redes": ["Mucho scroll... ¿y tus pendientes?", "Un ratito de redes está bien, no más."],
+    "idle": ["¿Sigues ahí?", "Te fuiste... aquí te espero."],
+    "vuelve": ["¡Volviste! Te esperaba.", "Bienvenido de vuelta."],
+    "tarde": ["Es muy tarde, deberías dormir.", "¿Sigues despierto? A descansar."],
+    "descanso": ["Llevas horas seguidas. Haz una pausa.", "Estira las piernas y bebe agua."],
 }
+
+
+SONIDOS_GATO = ["Miau~", "Prrr...", "¡Miau!", "*ronronea*", "*mueve la cola*"]
+# Un personaje con "habla": false (un gato, por ejemplo) solo maulla y hace gestos; los avisos con datos conservan el dato.
+FRASES_MUDO = {cat: list(SONIDOS_GATO) for cat in FRASES_DEFECTO}
+FRASES_MUDO.update({
+    "mouse": ["¿Miau?", "*te mira fijamente*", "Prrr..."],
+    "aterrizar": ["¡Miau!", "*se acomoda*"],
+    "posarse": ["*se acurruca*", "Prrr..."],
+    "magia": ["¡MIAUUU!", "*le da la locura*"],
+    "choque": ["¡Fshh!", "¡Miau!"],
+    "hola_otro": ["Miau~ {nombre}", "*se frota contra {nombre}*"],
+    "bailar": ["*mueve la cola*", "Miau miau~"],
+    "volar": ["¡Miau!"],
+    "pomodoro_inicio": ["¡Miau! {min} min de concentración."],
+    "pomodoro_mitad": ["*ronronea* Ya vas por la mitad."],
+    "pomodoro_fin": ["¡Miau! Descansa {descanso} min."],
+    "descanso_fin": ["¡Miau! A trabajar otra vez."],
+    "pomodoro_parar": ["*bosteza* Miau..."],
+    "pomodoro_nada": ["Miau... no hay pomodoro."],
+    "pomodoro_tiempo": ["Miau. Quedan {restante} de {fase}."],
+    "responder_saludo": ["¡Miau, {nombre}!", "*ronronea* {nombre}"],
+    "responder_baile": ["*mueve la cola*", "Miau miau~"],
+    "reaccion_habilidad": ["¡Miau!", "*se queda mirando con los ojos grandes*"],
+    "recordatorio_ok": ["Miau. En {min} min: {texto}"],
+    "recordatorio": ["¡Miau! {texto}"],
+    "recordatorio_tarde": ["¡Miau! Se pasó: {texto}"],
+    "reac_codigo": ["*mira la pantalla con curiosidad*", "Prrr..."],
+    "reac_video": ["*se queda mirando fijo la pantalla*", "Miau?"],
+    "reac_juego": ["*mueve la cola emocionado*", "¡Miau!"],
+    "reac_chat": ["¿Miau?", "*se sienta a esperar*"],
+    "reac_doc": ["*se sienta a mirar*", "Prrr..."],
+    "reac_musica": ["*mueve la cabeza al ritmo*", "Miau~"],
+    "reac_redes": ["*se estira*", "Miau..."],
+    "idle": ["*se hace bolita y duerme* Zzz", "Zzz... prrr"],
+    "vuelve": ["¡Miau! *ronronea*", "*corre a recibirte*"],
+    "tarde": ["*bosteza* Miau...", "Zzz... miau"],
+    "descanso": ["*se estira muy largo*", "Miau... ¿descansamos?"],
+})
 
 
 class Voz:
@@ -31,7 +81,8 @@ class Voz:
 
     def __init__(self, config):
         propias = config.get("frases") or {}
-        self.frases = {cat: list(propias.get(cat) or base) for cat, base in FRASES_DEFECTO.items()}
+        base_frases = FRASES_DEFECTO if config.get("habla", True) else FRASES_MUDO
+        self.frases = {cat: list(propias.get(cat) or base) for cat, base in base_frases.items()}
         self._ultima = {}
 
     def decir(self, categoria, **datos):

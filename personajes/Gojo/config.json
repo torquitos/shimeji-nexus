@@ -9,7 +9,7 @@
     "imagen": "retrato.png",
     "saludo": "Yo soy el más fuerte~",
     "color_globo": "#E3F2FD",
-    "color_texto": "#0D47A1",
+    "color_texto": "#00695C",
     "frases": {
         "mouse": [
             "¿Me estás mirando? Normal, soy irresistible~",
@@ -91,6 +91,50 @@
         "reaccion_habilidad": [
             "¡Wow, {nombre}! Casi tan bueno como yo~",
             "Nada mal... para un principiante~"
+        ],
+        "reac_codigo": [
+            "¿Programando? Yo con el Infinito no necesito compilar~",
+            "Ese código parece de un mortal. Pídeme ayuda con buena educación."
+        ],
+        "reac_video": [
+            "¿Viendo videos? Hazme un lugar en el sofá.",
+            "Pausa merecida... que no se haga costumbre."
+        ],
+        "reac_juego": [
+            "¿Jugando sin mí? Qué falta de respeto.",
+            "Tranquilo, el más fuerte soy yo. Tú diviértete."
+        ],
+        "reac_chat": [
+            "¿Chismeando? Cuéntamelo todo.",
+            "Otro mortal esperando tu respuesta, jaja."
+        ],
+        "reac_doc": [
+            "Muy aplicado... sospechoso.",
+            "Escribiendo documentos, qué nivel de seriedad."
+        ],
+        "reac_musica": [
+            "Buena música. Casi tan buena como yo.",
+            "Sube el volumen, que se luzca el maestro."
+        ],
+        "reac_redes": [
+            "Redes sociales... ¿lo importante era para mañana?",
+            "Scroll infinito. Mi técnica favorita."
+        ],
+        "idle": [
+            "¿Te quedaste dormido? Qué aburrido.",
+            "Zzz... despiértame cuando vuelvas."
+        ],
+        "vuelve": [
+            "¡Volviste! Ya me estaba aburriendo.",
+            "Mira quién apareció. Te extrañé... un poquito."
+        ],
+        "tarde": [
+            "Es tardísimo. Hasta el más fuerte duerme.",
+            "¿Sigues despierto? Ve a descansar, en serio."
+        ],
+        "descanso": [
+            "Llevas horas ahí. Estira esas piernas.",
+            "Descansa un poco, que no todos somos invencibles."
         ]
     },
     "habilidad": {

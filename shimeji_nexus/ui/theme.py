@@ -61,6 +61,27 @@ FONT_SECTION = (FONT_FAMILY_SEMIBOLD, 13)
 FONT_ROW = (FONT_FAMILY_SEMIBOLD, 12)
 FONT_CAPTION_BOLD = (FONT_FAMILY, 10, "bold")
 
+# Fuente pixel propia de la app (titulos). Si no se puede registrar, se usa Segoe UI.
+ACCENT_2 = "#ffcf5c"
+
+
+def _registrar_fuente_pixel():
+    import ctypes
+    import os
+    ruta = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "assets", "fuentes", "PixelifySans.ttf")
+    try:
+        if os.path.exists(ruta) and ctypes.windll.gdi32.AddFontResourceExW(ruta, 0x10, 0):
+            return "Pixelify Sans"
+    except Exception:
+        pass
+    return FONT_FAMILY_SEMIBOLD
+
+
+FONT_PIXEL_FAMILY = _registrar_fuente_pixel()
+FONT_PIXEL_TITLE = (FONT_PIXEL_FAMILY, 26)
+FONT_PIXEL = (FONT_PIXEL_FAMILY, 18)
+FONT_PIXEL_SMALL = (FONT_PIXEL_FAMILY, 15)
+
 # ---- Espaciado ----
 SPACE_XS = 4
 SPACE_SM = 8

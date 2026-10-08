@@ -88,10 +88,14 @@ def main():
     ap.add_argument("--tiempos", default="8,18,28,50", help="tick en que empieza cada frame de la habilidad despues del primero")
     ap.add_argument("--solo", default="", help="procesar solo estos estados (ej. magia) y conservar los demas")
     ap.add_argument("--fila-magia", type=int, default=2, help="fila (0-2) de la hoja donde esta la habilidad")
+    ap.add_argument("--sin-caminar", default="", help="celdas (0-7) de la fila 1 que se descartan, por ejemplo una pose que mira al lado contrario")
     ap.add_argument("--escala", type=float, default=None, help="escala fija; si no se da, se calcula con los frames de reposo")
     args = ap.parse_args()
     solo = {e for e in args.solo.split(",") if e}
     ESTADOS["magia"] = (args.fila_magia, [int(c) for c in args.magia_cols.split(",")], 8)
+    descartar = {int(c) for c in args.sin_caminar.split(",") if c.strip()}
+    if descartar:
+        ESTADOS["caminando"] = (0, [c for c in range(8) if c not in descartar], 8)
     estados = {k: v for k, v in ESTADOS.items() if not solo or k in solo}
 
     a = np.array(Image.open(args.hoja).convert("RGB")).astype(float)
@@ -128,6 +132,10 @@ def main():
             cabeza = img.crop((x0, y0, x1, y0 + max(4, int(alto * 0.2)))).getchannel("A")
             hx0, _, hx1, _ = cabeza.getbbox()
             ancla_x = x0 + (hx0 + hx1) / 2
+            if estado == "caminando":
+                # al caminar, la cabeza o la cola cambian de sitio entre poses: anclar al centro del cuerpo evita saltos laterales
+                masa = np.asarray(img.getchannel("A"))[y0:y1, x0:x1] > 0
+                ancla_x = x0 + float(np.nonzero(masa)[1].mean())
             nuevo = (max(1, round((x1 - x0) * escala)), max(1, round(alto * escala)))
             peq = img.crop((x0, y0, x1, y1)).resize(nuevo, Image.Resampling.NEAREST)
             datos = np.array(peq)

@@ -38,6 +38,14 @@ class HeroMixin:
             corner_radius=16, height=56, font=theme.FONT_BODY_MEDIUM, state="disabled",
         )
         self._btn_cerrar_esta_mascota.pack(side="left", padx=(4, 0))
+        ctk.CTkButton(
+            self.frame_botones, text="Editar", width=60, command=self.editar_personaje, fg_color="transparent", hover_color=theme.SURFACE,
+            text_color=theme.TEXT_DIM, corner_radius=10, height=36, font=theme.FONT_CAPTION,
+        ).pack(side="right")
+        ctk.CTkButton(
+            self.frame_botones, text="Eliminar", width=76, command=self.eliminar_personaje, fg_color="transparent", hover_color=theme.SURFACE,
+            text_color=theme.TEXT_FAINT, corner_radius=10, height=36, font=theme.FONT_CAPTION,
+        ).pack(side="right")
 
         c = self.canvas_hero = tk.Canvas(self.main, width=HERO_W, height=HERO_H, bg=theme.BG, bd=0, highlightthickness=0)
         c.pack(side="top", anchor="nw")
@@ -63,11 +71,20 @@ class HeroMixin:
                 break
         return (fam, tam)
 
+    @staticmethod
+    def _ajustar_ancho(sprite):
+        """Los personajes anchos (un fantasma, un dragon) no deben tapar todo el escenario."""
+        maximo = 270
+        if sprite.width <= maximo:
+            return sprite
+        k = maximo / sprite.width
+        return sprite.resize((maximo, round(sprite.height * k)), Image.Resampling.LANCZOS)
+
     def _sprite(self, nombre, info):
         if nombre not in self._sprites:
             ruta = os.path.join(base_dir(), "personajes", info["folder"], info["imagen"])
             try:
-                self._sprites[nombre] = image_utils.cargar_sprite(ruta, SPRITE_ALTO) if os.path.exists(ruta) else None
+                self._sprites[nombre] = self._ajustar_ancho(image_utils.cargar_sprite(ruta, SPRITE_ALTO)) if os.path.exists(ruta) else None
             except Exception as e:
                 debug_log(f"Error cargando sprite {ruta}: {e}")
                 self._sprites[nombre] = None
@@ -133,11 +150,16 @@ class HeroMixin:
         self._acomodar_texto(bool(frase))
 
         self._btn_invocar_en_pantalla.actualizar("En pantalla" if activa else f"Invocar a {primer_nombre}", color_acento, True, activa)
-        self._btn_cerrar_esta_mascota.configure(state="normal" if activa else "disabled")
+        if activa:
+            self._btn_cerrar_esta_mascota.configure(state="normal")
+            self._btn_cerrar_esta_mascota.pack(side="left", padx=(4, 0))
+        else:
+            self._btn_cerrar_esta_mascota.pack_forget()
 
         sprite = self._sprite(nombre, info)
         if nombre not in self._fondos:
-            self._fondos[nombre] = preview.componer_hero(sprite, color_acento, HERO_W, HERO_H, primer_nombre.upper(), con_sprite=False)
+            self._fondos[nombre] = preview.componer_hero(sprite, color_acento, HERO_W, HERO_H, primer_nombre.upper(), con_sprite=False,
+                                                         forma_tecnica=(info.get("habilidad") or {}).get("forma", "orbes"))
         self._fundir_fondo(self._fondos[nombre])
         self._poner_sprite_vivo(sprite, info)
         self.actualizar_estados()

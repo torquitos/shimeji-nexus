@@ -49,12 +49,13 @@ def _completar(provider, api_key, system_prompt, user_content, max_tokens):
     return None
 
 
-def generar_texto(system_prompt, user_text, max_palabras=12):
+def generar_texto(system_prompt, user_text, max_palabras=12, contexto=""):
     provider = _leer_provider()
     api_key = _leer_key(provider)
     if not api_key:
         return MENSAJE_SIN_CLAVE
-    user_content = f"El usuario dice: '{user_text}'. Responde corto ({max_palabras} palabras max) en espanol."
+    previo = f"{contexto}\n\n" if contexto else ""
+    user_content = f"{previo}El usuario dice: '{user_text}'. Responde corto ({max_palabras} palabras max) en espanol."
     try:
         resultado = _completar(provider, api_key, system_prompt, user_content, max_tokens=80)
         if resultado is None:

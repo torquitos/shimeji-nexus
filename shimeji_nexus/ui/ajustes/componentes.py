@@ -8,14 +8,14 @@ ACENTO = theme.ACCENT_BRAND
 
 
 def encabezado(parent, titulo, ayuda=None):
-    ctk.CTkLabel(parent, text=titulo, font=theme.FONT_DISPLAY, text_color=theme.TEXT).pack(anchor="w")
+    ctk.CTkLabel(parent, text=titulo, font=theme.FONT_PIXEL_TITLE, text_color=theme.TEXT).pack(anchor="w")
     if ayuda:
         ctk.CTkLabel(parent, text=ayuda, font=theme.FONT_BODY, text_color=theme.TEXT_DIM, anchor="w", justify="left", wraplength=470).pack(anchor="w", pady=(2, 0))
 
 
 def seccion(parent, titulo, ayuda=None):
     """Titulo de seccion y, debajo, una superficie plana que agrupa sus filas."""
-    ctk.CTkLabel(parent, text=titulo, font=theme.FONT_SECTION, text_color=theme.TEXT, anchor="w").pack(fill="x", pady=(24, 2 if ayuda else 8))
+    ctk.CTkLabel(parent, text=titulo, font=theme.FONT_PIXEL_SMALL, text_color=theme.ACCENT_2, anchor="w").pack(fill="x", pady=(24, 2 if ayuda else 8))
     if ayuda:
         ctk.CTkLabel(parent, text=ayuda, font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM, anchor="w", justify="left", wraplength=470).pack(fill="x", pady=(0, 8))
     marco = ctk.CTkFrame(parent, fg_color=theme.SURFACE, corner_radius=12)
@@ -67,6 +67,46 @@ def fila_comando(card, comando, texto):
     chip = ctk.CTkLabel(fila, text=comando, font=("Consolas", 12), text_color=theme.TEXT, fg_color=theme.SURFACE_SELECTED, corner_radius=6, padx=8, pady=2)
     chip.pack(side="left")
     ctk.CTkLabel(fila, text=texto, font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM, anchor="w").pack(side="left", padx=(12, 0))
+
+
+def fila_atajo(card, titulo, ayuda, teclas):
+    fila = _fila(card)
+    _textos(fila, titulo, ayuda)
+    for i, tecla in enumerate(reversed(teclas)):
+        if i:
+            ctk.CTkLabel(fila, text="+", font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM).pack(side="right", padx=3)
+        ctk.CTkLabel(fila, text=tecla, font=("Consolas", 12, "bold"), text_color=theme.TEXT, fg_color=theme.SURFACE_SELECTED,
+                     corner_radius=5, padx=8, pady=3).pack(side="right")
+
+
+class FilaConsumo:
+    """RAM y CPU reales de la app y sus mascotas, con barras que se actualizan solas."""
+
+    def __init__(self, card, ventana):
+        from shimeji_nexus.core import sistema
+        self.sistema, self.ventana = sistema, ventana
+        fila = _fila(card, 50)
+        self.etiquetas, self.barras = [], []
+        for _ in range(2):
+            col = ctk.CTkFrame(fila, fg_color="transparent")
+            col.pack(side="left", fill="x", expand=True, padx=(0, 16))
+            self.etiquetas.append(ctk.CTkLabel(col, text="", font=theme.FONT_ROW, text_color=theme.TEXT, anchor="w"))
+            self.etiquetas[-1].pack(anchor="w")
+            self.barras.append(ctk.CTkProgressBar(col, height=6, fg_color=theme.TRACK, progress_color=theme.SUCCESS))
+            self.barras[-1].pack(fill="x", pady=(6, 0))
+        self.sistema.consumo()
+        ventana.after(1200, self._medir)
+
+    def _medir(self):
+        try:
+            ram, cpu = self.sistema.consumo()
+            self.etiquetas[0].configure(text=f"RAM · {ram:.0f} MB")
+            self.etiquetas[1].configure(text=f"CPU · {cpu:.0f} %".replace(".", ","))
+            self.barras[0].set(min(1, ram / 600))
+            self.barras[1].set(min(1, cpu / 25))
+            self.ventana.after(2000, self._medir)
+        except Exception:
+            pass
 
 
 def campo(parent, **extra):

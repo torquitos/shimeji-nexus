@@ -58,3 +58,9 @@ shared_state/
 
 # Recordatorios de cada mascota
 recordatorios/
+
+# Memoria de conversacion de cada personaje
+memoria/
+cache/
+err.txt
+papelera/

@@ -95,6 +95,50 @@
         "reaccion_habilidad": [
             "¡Wow, {nombre}! ¡Eso estuvo increíble~!",
             "¡Guau! ¿Lo inventaste tú, {nombre}?"
+        ],
+        "reac_codigo": [
+            "¡Qué código tan genial! ¿Puedo inventar algo con eso?",
+            "¡Wow, tú sí eres un genio como yo~!"
+        ],
+        "reac_video": [
+            "¡Quiero ver también~!",
+            "¡Qué divertido! ¿De qué trata?"
+        ],
+        "reac_juego": [
+            "¡Juguemos! ¡Yo hago los trucos~!",
+            "¡Tú puedes ganar, yo te animo!"
+        ],
+        "reac_chat": [
+            "¡Saluda a tus amigos de mi parte~!",
+            "¡Hablar con amigos es lo mejor!"
+        ],
+        "reac_doc": [
+            "¡Cuánto trabajo! ¡Yo te ayudo con un invento~!",
+            "¡Qué ordenado! Yo siempre lo dejo todo hecho un lío."
+        ],
+        "reac_musica": [
+            "¡Me encanta esa canción! ¡A bailar~!",
+            "¡Qué música tan linda, sube el volumen!"
+        ],
+        "reac_redes": [
+            "¡Cuántas cosas bonitas! Pero no te distraigas~",
+            "Uy, el scroll infinito... ¡yo también me pierdo!"
+        ],
+        "idle": [
+            "¿Dónde estás~? ¡Vuelve pronto!",
+            "Voy a inventar algo mientras no estás..."
+        ],
+        "vuelve": [
+            "¡Volviste~! ¡Qué felicidad!",
+            "¡Hola otra vez! ¡Te extrañé mucho!"
+        ],
+        "tarde": [
+            "¡Ya es muy tarde! ¡A dormir se ha dicho~!",
+            "¡Descansa! Mañana inventamos más cosas."
+        ],
+        "descanso": [
+            "¡Llevas mucho rato! ¡Estira esos bracitos~!",
+            "¡Pausa! ¡Es hora de un snack!"
         ]
     },
     "animaciones": {

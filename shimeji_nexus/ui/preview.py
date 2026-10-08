@@ -1,8 +1,7 @@
-import math
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
-from shimeji_nexus.ui import theme
+from shimeji_nexus.ui import fondos, theme
 
 _FUENTES = ("C:/Windows/Fonts/segoeuib.ttf", "C:/Windows/Fonts/arialbd.ttf")
 
@@ -46,25 +45,7 @@ def _mascara_redondeada(ancho, alto, caja, radio):
     return m.resize((ancho, alto), Image.Resampling.LANCZOS)
 
 
-def _emblema_fondo(ancho, alto, caja, color):
-    """Anillos y marcas concentricas muy tenues, centrados en el escenario."""
-    k = 2
-    x0, y0, x1, y1 = caja
-    cx, cy = ((x0 + x1) / 2) * k, (y0 + (y1 - y0) * 0.46) * k
-    capa = Image.new("L", (ancho * k, alto * k), 0)
-    d = ImageDraw.Draw(capa)
-    for r, w in ((128, 3), (100, 2), (72, 2)):
-        d.ellipse((cx - r * k, cy - r * k, cx + r * k, cy + r * k), outline=255, width=w * k)
-    for i in range(48):
-        a = i * math.pi / 24
-        r0, r1 = 128 * k, (146 if i % 4 == 0 else 138) * k
-        d.line((cx + r0 * math.cos(a), cy + r0 * math.sin(a), cx + r1 * math.cos(a), cy + r1 * math.sin(a)), fill=255, width=2 * k)
-    pts = [(cx + 100 * k * math.cos(-math.pi / 2 + i * 2 * math.pi / 3), cy + 100 * k * math.sin(-math.pi / 2 + i * 2 * math.pi / 3)) for i in range(3)]
-    d.polygon(pts, outline=255, width=2 * k)
-    return capa.resize((ancho, alto), Image.Resampling.LANCZOS).point(lambda v: int(v * 0.30))
-
-
-def componer_hero(sprite, color_acento, ancho, alto, marca, con_sprite=True):
+def componer_hero(sprite, color_acento, ancho, alto, marca, con_sprite=True, forma_tecnica="orbes"):
     """Portada del personaje: resplandor de su color, nombre como marca de agua,
     el sprite grande a la derecha con sombra, y oscurecido a la izquierda para el texto."""
     base = _capa(ancho, alto, theme.BG)
@@ -76,7 +57,11 @@ def componer_hero(sprite, color_acento, ancho, alto, marca, con_sprite=True):
     base = Image.composite(_capa(ancho, alto, luz), base,
                            _resplandor(ancho, alto, cx, int(alto * 0.40), int(ancho * 0.22), int(alto * 0.30), 0.20, 2.0))
 
-    fuente = _fuente(int(alto * 0.30))
+    tam = int(alto * 0.30)
+    fuente = _fuente(tam)
+    while fuente is not None and marca and fuente.getlength(marca) > ancho * 0.64 and tam > 40:
+        tam -= 8
+        fuente = _fuente(tam)
     if fuente is not None and marca:
         capa = Image.new("L", (ancho, alto), 0)
         ImageDraw.Draw(capa).text((int(ancho * 0.99), int(alto * 0.985)), marca, font=fuente, fill=255, anchor="rb")
@@ -88,7 +73,7 @@ def componer_hero(sprite, color_acento, ancho, alto, marca, con_sprite=True):
     izquierda = Image.linear_gradient("L").rotate(90).resize((ancho, alto), Image.Resampling.BICUBIC)
     base = Image.composite(_capa(ancho, alto, theme.BG), base, izquierda.point(lambda v: int(max(0.0, 1 - v / 140) * 170)))
 
-    base = _escenario(base, color_acento, ancho, alto)
+    base = _escenario(base, color_acento, ancho, alto, forma_tecnica)
 
     if sprite is not None:
         x, y = posicion_sprite(sprite, ancho, alto)
@@ -105,13 +90,13 @@ def componer_hero(sprite, color_acento, ancho, alto, marca, con_sprite=True):
     return base
 
 
-def _escenario(base, color, ancho, alto):
+def _escenario(base, color, ancho, alto, tipo="orbes"):
     """Panel de cristal: relleno claro tenue, emblema, luz superior y borde fino del color del personaje."""
     caja = ESCENARIO
     forma = _mascara_redondeada(ancho, alto, caja, RADIO)
     base = Image.composite(_capa(ancho, alto, "#ffffff"), base, forma.point(lambda v: int(v * 0.05)))
     cx = (caja[0] + caja[2]) // 2
-    emb = ImageChops.multiply(_emblema_fondo(ancho, alto, caja, color), forma)
+    emb = ImageChops.multiply(fondos.emblema(ancho, alto, caja, tipo), forma)
     base = Image.composite(_capa(ancho, alto, color), base, emb)
     luz = ImageChops.multiply(_resplandor(ancho, alto, cx, caja[1] + 40, 170, 150, 0.22, 1.5), forma)
     base = Image.composite(_capa(ancho, alto, theme.blend_color("#ffffff", color, 0.4)), base, luz)

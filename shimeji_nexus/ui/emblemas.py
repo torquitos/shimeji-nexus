@@ -98,7 +98,20 @@ def _rayo(img, n, c):
     _corazon(img, n * 0.80, n * 0.76, n * 0.06, c[0])
 
 
-_FORMAS = {"orbitar": _orbitar, "brasas": _brasas, "espiral": _espiral, "rayo": _rayo}
+def _zoomies(img, n, c):
+    """Zoomies: estrella dorada con lineas de velocidad y una huella de gato."""
+    m = n / 2
+    img.alpha_composite(_brillo(n, c[2], m, m, int(n * 0.5), 0.85))
+    d = ImageDraw.Draw(img)
+    for i, y in enumerate((0.30, 0.45, 0.60, 0.74)):
+        d.line([(n * (0.08 + 0.06 * i), n * y), (n * (0.42 + 0.04 * i), n * y)], fill=c[1], width=int(n * 0.035))
+    _disco(img, n * 0.64, n * 0.58, n * 0.15, c[0], c[1], K)
+    for x, y in ((0.52, 0.36), (0.64, 0.30), (0.76, 0.36), (0.82, 0.48)):
+        _disco(img, n * x, n * y, n * 0.055, c[0], c[1], K)
+    _disco(img, n * 0.80, n * 0.20, n * 0.04, "#ffffff")
+
+
+_FORMAS = {"orbitar": _orbitar, "brasas": _brasas, "espiral": _espiral, "rayo": _rayo, "zoomies": _zoomies}
 
 
 def _generico(img, n, c):

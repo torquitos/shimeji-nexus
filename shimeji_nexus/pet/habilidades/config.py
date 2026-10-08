@@ -1,7 +1,7 @@
 """Constantes y carga de la habilidad de un personaje."""
 from shimeji_nexus.ui.theme import acento_desde_color_texto, blend_color
 
-FORMAS = ("orbitar", "brasas", "espiral", "rayo")
+FORMAS = ("orbitar", "brasas", "espiral", "rayo", "zoomies")
 
 # Linea de tiempo de una habilidad, en ticks de 35 ms (76 ticks = 2.7 s)
 CARGA, DISPARO, IMPACTO, TOTAL = 28, 22, 22, 76

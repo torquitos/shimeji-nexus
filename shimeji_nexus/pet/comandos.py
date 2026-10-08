@@ -2,6 +2,8 @@ import random
 import time
 
 from shimeji_nexus.audio import sound_manager
+from shimeji_nexus.core import memoria
+from shimeji_nexus.core import settings as settings_manager
 from shimeji_nexus.core.productividad import formatear_segundos
 
 
@@ -41,7 +43,8 @@ class ComandosMixin:
             self._avisar(self.voz.decir("recordatorio_tarde" if r["tarde"] else "recordatorio", texto=r["texto"]), "magic")
         texto = self._texto_reloj(ahora)
         self.canvas.itemconfig(self.reloj_id, text=texto)
-        if (self.habilidad_auto and ahora >= self._prox_habilidad and self.estado == "quieto"
+        ajustes = settings_manager.cargar()
+        if (ajustes.get("habilidad_auto", True) and not ajustes.get("concentracion") and ahora >= self._prox_habilidad and self.estado == "quieto"
                 and not self.chat.chat_abierto and self.efecto.t is None):
             self.accion_magica()
             self._prox_habilidad = ahora + random.uniform(120, 300)
@@ -85,4 +88,12 @@ class ComandosMixin:
                 return "Uso: /recordar <minutos> <texto>"
             self.recordatorios.agregar(minutos, partes[2])
             return self.voz.decir("recordatorio_ok", min=self._num(minutos), texto=partes[2])
-        return "Comandos: /pomodoro [min], /parar, /tiempo, /recordar <min> <texto>"
+        if cmd == "/nombre":
+            if len(partes) < 2:
+                return memoria.nombre_usuario() and f"Te llamo {memoria.nombre_usuario()}. Cámbialo con /nombre <nombre>." or "Uso: /nombre <cómo quieres que te llame>"
+            memoria.guardar_nombre_usuario(" ".join(partes[1:]))
+            return f"¡Anotado! A partir de ahora te llamo {memoria.nombre_usuario()}."
+        if cmd == "/olvidar":
+            self.chat.memoria.olvidar()
+            return "Listo, olvidé lo que hablamos."
+        return "Comandos: /pomodoro [min], /parar, /tiempo, /recordar <min> <texto>, /nombre <nombre>, /olvidar"

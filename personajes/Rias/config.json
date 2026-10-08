@@ -91,6 +91,50 @@
         "reaccion_habilidad": [
             "Impresionante, {nombre}.",
             "Qué poder, {nombre}. Cuidado con excederte."
+        ],
+        "reac_codigo": [
+            "Concéntrate, tú puedes con ese código.",
+            "Qué trabajo tan prolijo. Estoy orgullosa."
+        ],
+        "reac_video": [
+            "Un descanso viendo videos, te lo mereces.",
+            "Disfruta, pero no olvides tus pendientes."
+        ],
+        "reac_juego": [
+            "Diviértete, pero con moderación.",
+            "Juega bien y no te molestes con nadie."
+        ],
+        "reac_chat": [
+            "Saluda de mi parte a quien esté al otro lado.",
+            "Cuida tus palabras, cada mensaje cuenta."
+        ],
+        "reac_doc": [
+            "Ese documento va quedando muy bien.",
+            "Qué orden, me encanta verte organizado."
+        ],
+        "reac_musica": [
+            "Qué música tan agradable.",
+            "Una buena melodía ayuda a concentrarse."
+        ],
+        "reac_redes": [
+            "Un poco de redes está bien, no te pierdas.",
+            "Cuidado con perder el tiempo, querido."
+        ],
+        "idle": [
+            "¿Te fuiste? Aquí te espero.",
+            "Descansa, yo vigilo todo mientras tanto."
+        ],
+        "vuelve": [
+            "Bienvenido de vuelta, te esperaba.",
+            "¡Qué bueno verte otra vez!"
+        ],
+        "tarde": [
+            "Ya es muy tarde, deberías descansar.",
+            "Los desvelos no ayudan. A dormir, por favor."
+        ],
+        "descanso": [
+            "Llevas mucho rato. Haz una pausa.",
+            "Estira el cuerpo y bebe agua, te hará bien."
         ]
     },
     "habilidad": {

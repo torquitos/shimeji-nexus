@@ -28,7 +28,7 @@ class SidebarMixin:
             ctk.CTkLabel(header, text="", image=logo).pack(side="left", padx=(0, 12))
         col = ctk.CTkFrame(header, fg_color="transparent")
         col.pack(side="left")
-        ctk.CTkLabel(col, text="Shimeji Nexus", font=theme.FONT_SECTION, text_color=theme.TEXT, anchor="w").pack(anchor="w")
+        ctk.CTkLabel(col, text="Shimeji Nexus", font=theme.FONT_PIXEL, text_color=theme.TEXT, anchor="w").pack(anchor="w")
         self.lbl_contador = ctk.CTkLabel(col, text="Personajes", font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM, anchor="w")
         self.lbl_contador.pack(anchor="w")
 
@@ -44,12 +44,20 @@ class SidebarMixin:
         self.lbl_activas = ctk.CTkLabel(fila, text="", font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM)
         self.lbl_activas.pack(side="left", padx=(6, 0))
         self._btn_todas = ctk.CTkButton(
-            fila, text="Invocar a todas", width=96, height=24, command=self.lanzar_todas, fg_color="transparent", hover_color=theme.SURFACE,
+            fila, text="Invocar todas", width=84, height=24, command=self.lanzar_todas, fg_color="transparent", hover_color=theme.SURFACE,
             text_color=theme.ACCENT_BRAND, font=theme.FONT_CAPTION_BOLD, corner_radius=8)
         self._btn_todas.pack(side="right")
+        self._btn_cerrar_todas = ctk.CTkButton(
+            fila, text="Cerrar todas", width=76, height=24, command=self.matar_todos, fg_color="transparent", hover_color=theme.SURFACE,
+            text_color=theme.DANGER, font=theme.FONT_CAPTION_BOLD, corner_radius=8)
 
         sidebar_footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         sidebar_footer.pack(fill="x", padx=18, pady=18)
+        self._pasos = ctk.CTkFrame(self.sidebar, fg_color=theme.SURFACE, corner_radius=10, border_width=1, border_color=theme.blend_color(theme.ACCENT_2, theme.PANEL, 0.4))
+        ctk.CTkLabel(self._pasos, text="Primeros pasos", font=theme.FONT_PIXEL_SMALL, text_color=theme.ACCENT_2, anchor="w").pack(anchor="w", padx=14, pady=(10, 2))
+        ctk.CTkLabel(self._pasos, text="1. Elige un personaje\n2. Pulsa Invocar\n3. Míralo reaccionar mientras trabajas", font=theme.FONT_CAPTION,
+                     text_color=theme.TEXT_DIM, anchor="w", justify="left").pack(anchor="w", padx=14, pady=(0, 10))
+        self._pasos_antes = sidebar_footer
         ctk.CTkButton(
             sidebar_footer, text="\u2699", width=40, height=40, command=self.abrir_settings, fg_color=theme.SURFACE_SELECTED,
             hover_color=theme.TRACK, text_color=theme.TEXT_SOFT, corner_radius=8, font=theme.FONT_BODY_LARGE,
@@ -155,7 +163,14 @@ class SidebarMixin:
     def _actualizar_franja(self):
         n, total = len(self.mascotas_activas), len(self.personajes_datos)
         self._punto.configure(text_color=theme.SUCCESS if n else theme.TEXT_FAINT)
-        self.lbl_activas.configure(text=f"{n} en pantalla" if n else "Ninguna en pantalla")
-        todas = n == total and total > 0
-        self._btn_todas.configure(text="Cerrar todas" if todas else "Invocar a todas", command=self.matar_todos if todas else self.lanzar_todas)
-        self._btn_todas.pack(side="right")
+        self.lbl_activas.configure(text=(f"{n} activa" + ("s" if n != 1 else "")) if n else "Ninguna en pantalla")
+        self._btn_todas.pack_forget()
+        self._btn_cerrar_todas.pack_forget()
+        if n:
+            self._btn_cerrar_todas.pack(side="right")
+        if n < total:
+            self._btn_todas.pack(side="right")
+        if n:
+            self._pasos.pack_forget()
+        elif not self._pasos.winfo_ismapped():
+            self._pasos.pack(fill="x", padx=18, pady=(10, 0), before=self._pasos_antes)

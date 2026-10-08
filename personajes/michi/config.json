@@ -1,0 +1,68 @@
+{
+    "nombre": "solsi",
+    "personalidad": "Eres Michi, un gatito calicó. No hablas: solo maúllas, ronroneas y haces sonidos de gato.",
+    "saludo": "Miau~",
+    "color_globo": "#FFF3E0",
+    "color_texto": "#E65100",
+    "animaciones": {
+        "caminando": {
+            "frames": [
+                "anim/caminando_0.png",
+                "anim/caminando_1.png",
+                "anim/caminando_2.png",
+                "anim/caminando_3.png",
+                "anim/caminando_4.png",
+                "anim/caminando_5.png",
+                "anim/caminando_6.png"
+            ],
+            "fps": 8,
+            "velocidad": 4.0
+        },
+        "quieto": {
+            "frames": [
+                "anim/quieto_0.png",
+                "anim/quieto_1.png",
+                "anim/quieto_2.png",
+                "anim/quieto_3.png"
+            ],
+            "fps": 3
+        },
+        "saludo": {
+            "frames": [
+                "anim/saludo_0.png",
+                "anim/saludo_1.png",
+                "anim/saludo_2.png",
+                "anim/saludo_3.png"
+            ],
+            "fps": 6
+        },
+        "magia": {
+            "frames": [
+                "anim/magia_0.png",
+                "anim/magia_1.png",
+                "anim/magia_2.png",
+                "anim/magia_3.png",
+                "anim/magia_4.png"
+            ],
+            "fps": 8,
+            "tiempos": [
+                10,
+                20,
+                30,
+                58
+            ]
+        }
+    },
+    "imagen": "retrato.png",
+    "habla": false,
+    "habilidad": {
+        "nombre": "Zoomies",
+        "forma": "zoomies",
+        "colores": [
+            "#ffd23f",
+            "#fff2a8",
+            "#ff9f43"
+        ],
+        "descripcion": "Le da el ataque de locura de los gatos: corre por la pantalla a toda velocidad y se pone a dar volteretas."
+    }
+}

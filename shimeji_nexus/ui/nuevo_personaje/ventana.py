@@ -1,17 +1,19 @@
+import os
 import threading
 from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 
 from shimeji_nexus.core import creador, prompt_hoja
-from shimeji_nexus.ui import theme
+from shimeji_nexus.ui import theme, ventanas
 from shimeji_nexus.ui.ajustes.componentes import ACENTO, boton_primario, boton_secundario, campo, encabezado, seccion, selector
 from shimeji_nexus.ui.nuevo_personaje.vista_previa import VistaPrevia
 from shimeji_nexus.ui.theme import acento_desde_color_texto
 
 MODOS = ("Una imagen", "Hoja de sprites")
 IMAGENES = [("Imágenes", "*.png *.jpg *.jpeg")]
-SUGERENCIA = "Cuéntalo como si se lo explicaras a un amigo: es tímida, siempre tiene hambre y te regaña si trabajas tarde…"
+TONOS = ("Tímida", "Tsundere", "Bromista", "Hambrienta", "Seria y madura", "Enérgica")
+SUGERENCIA ="Cuéntalo como si se lo explicaras a un amigo: es tímida, siempre tiene hambre y te regaña si trabajas tarde…"
 
 
 class AddCharacterWindow:
@@ -21,11 +23,11 @@ class AddCharacterWindow:
         self.launcher = launcher
         self.win = ctk.CTkToplevel(parent)
         self.win.title("Nuevo personaje")
-        self.win.geometry("860x720")
+        ventanas.centrar_sobre(self.win, parent, 860, 780)
         self.win.configure(fg_color=theme.BG)
+        ventanas.estilizar(self.win)
         self.win.resizable(False, False)
         self.win.transient(parent)
-        self.win.grab_set()
         self.var_imagen, self.var_hoja, self.var_retrato = ctk.StringVar(), ctk.StringVar(), ctk.StringVar()
         self.vista = VistaPrevia(self.win, acento_desde_color_texto(creador.siguiente_color()))
         self.vista.pack(side="right", fill="y")
@@ -37,6 +39,7 @@ class AddCharacterWindow:
         self._imagenes(seccion(self.form, "2. Su imagen"))
         self._habla(seccion(self.form, "3. Cómo habla"))
         self._refrescar()
+        ventanas.mostrar(self.win, modal=True)
 
     # ---------- piezas ----------
     def _etiqueta(self, card, texto):
@@ -50,17 +53,39 @@ class AddCharacterWindow:
         return entrada
 
     def _quien(self, card):
-        self.entry_nombre = self._campo(card, "Nombre", "Ej. Zero Two")
-        self.entry_serie = self._campo(card, "Serie o anime (opcional)", "Ej. Darling in the Franxx")
-        ctk.CTkFrame(card, fg_color="transparent", height=16).pack()
+        fila = ctk.CTkFrame(card, fg_color="transparent")
+        fila.pack(fill="x", padx=16, pady=(0, 16))
+        fila.grid_columnconfigure((0, 1), weight=1, uniform="c")
+        for i, (titulo, ejemplo, attr) in enumerate((("Nombre", "Ej. Zero Two", "entry_nombre"),
+                                                    ("Serie o anime (opcional)", "Ej. Darling in the Franxx", "entry_serie"))):
+            ctk.CTkLabel(fila, text=titulo, font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM, anchor="w").grid(row=0, column=i, sticky="w", pady=(14, 4), padx=(0 if i == 0 else 8, 0))
+            entrada = campo(fila, placeholder_text=ejemplo)
+            entrada.grid(row=1, column=i, sticky="ew", padx=(0, 8) if i == 0 else (8, 0))
+            entrada.bind("<KeyRelease>", lambda e: self._refrescar())
+            setattr(self, attr, entrada)
+
+    def _zona(self, parent, variable, vacio, ayuda):
+        """Zona grande para elegir un archivo; se pone verde con el nombre cuando ya hay uno."""
+        zona = ctk.CTkButton(parent, text=vacio, height=76, corner_radius=10, border_width=2, border_color=ACENTO, fg_color=theme.FIELD,
+                             hover_color=theme.SURFACE_SELECTED, text_color=theme.TEXT_DIM, font=theme.FONT_BODY,
+                             command=lambda: self._elegir(variable))
+        zona.pack(fill="x", padx=16, pady=(14, 0))
+        ctk.CTkLabel(parent, text=ayuda, font=theme.FONT_CAPTION, text_color=theme.TEXT_FAINT, anchor="w").pack(anchor="w", padx=18, pady=(4, 0))
+
+        def cambio(*_):
+            if variable.get():
+                zona.configure(text="✔  " + os.path.basename(variable.get()) + "\nHaz clic para cambiarla", border_color=theme.SUCCESS, text_color=theme.TEXT)
+            else:
+                zona.configure(text=vacio, border_color=ACENTO, text_color=theme.TEXT_DIM)
+        variable.trace_add("write", cambio)
 
     def _imagenes(self, card):
         self.modo = ctk.StringVar(value=MODOS[0])
         selector(card, MODOS, self.modo, lambda _v: self._cambiar_modo()).pack(fill="x", padx=16, pady=(16, 0))
         self.panel_imagen = ctk.CTkFrame(card, fg_color="transparent")
-        self._selector(self.panel_imagen, "Imagen del personaje", "PNG con fondo liso o transparente.", self.var_imagen)
+        self._zona(self.panel_imagen, self.var_imagen, "Haz clic para elegir una imagen\nPNG o JPG", "Fondo liso o transparente.")
         self.panel_hoja = ctk.CTkFrame(card, fg_color="transparent")
-        self._selector(self.panel_hoja, "Hoja de sprites", "8 columnas × 3 filas, fondo verde.", self.var_hoja)
+        self._zona(self.panel_hoja, self.var_hoja, "Haz clic para elegir la hoja de sprites\nPNG o JPG", "8 columnas × 3 filas, fondo verde.")
         self._selector(self.panel_hoja, "Retrato en alta resolución (opcional)", "Se usa en la portada y en el chat.", self.var_retrato)
         boton_secundario(self.panel_hoja, "Copiar prompt para generar la hoja", self._copiar_prompt, 260).pack(anchor="w", padx=16, pady=(16, 4))
         self.lbl_copiado = ctk.CTkLabel(self.panel_hoja, text="Pégalo en ChatGPT o Gemini, genera la imagen y súbela aquí.", font=theme.FONT_CAPTION,
@@ -80,15 +105,40 @@ class AddCharacterWindow:
         ctk.CTkLabel(parent, text=ayuda, font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM, anchor="w").pack(anchor="w", padx=16, pady=(4, 0))
 
     def _habla(self, card):
+        chips = ctk.CTkFrame(card, fg_color="transparent")
+        chips.pack(fill="x", padx=16, pady=(16, 0))
+        self.tono, self.botones_tono = "", {}
+        for i, tono in enumerate(TONOS):
+            b = ctk.CTkButton(chips, text=tono, width=10, height=28, corner_radius=14, font=theme.FONT_CAPTION, fg_color=theme.SURFACE_SELECTED,
+                              hover_color=theme.TRACK, text_color=theme.TEXT_SOFT, command=lambda t=tono: self._elegir_tono(t))
+            b.grid(row=i // 3, column=i % 3, sticky="ew", padx=(0, 6), pady=(0, 6))
+            self.botones_tono[tono] = b
+        chips.grid_columnconfigure((0, 1, 2), weight=1, uniform="t")
         self.text_pers = ctk.CTkTextbox(card, height=92, fg_color=theme.FIELD, border_color=theme.DIVIDER, border_width=1, text_color=theme.TEXT,
                                         corner_radius=8, font=theme.FONT_BODY, wrap="word")
-        self.text_pers.pack(fill="x", padx=16, pady=16)
+        self.text_pers.pack(fill="x", padx=16, pady=(4, 16))
         self._sugerencia = True
         self.text_pers.insert("1.0", SUGERENCIA)
         self.text_pers.configure(text_color=theme.TEXT_FAINT)
         interno = self.text_pers._textbox
+        interno.bind("<KeyRelease>", lambda e: self._refrescar(), add="+")
         interno.bind("<FocusIn>", self._entrar_texto, add="+")
         interno.bind("<FocusOut>", self._salir_texto, add="+")
+
+    def _elegir_tono(self, tono):
+        """Un tono rellena el texto de personalidad; se puede seguir escribiendo encima."""
+        self.tono = "" if tono == self.tono else tono
+        for t, b in self.botones_tono.items():
+            activo = t == self.tono
+            b.configure(fg_color=ACENTO if activo else theme.SURFACE_SELECTED, text_color=theme.BG if activo else theme.TEXT_SOFT)
+        self.text_pers.configure(text_color=theme.TEXT)
+        self.text_pers.delete("1.0", "end")
+        self._sugerencia = False
+        if self.tono:
+            self.text_pers.insert("1.0", f"Habla de forma {self.tono.lower()}. ")
+        else:
+            self._salir_texto(None)
+        self._refrescar()
 
     def _entrar_texto(self, _e):
         self.text_pers.configure(border_color=ACENTO)
@@ -138,7 +188,8 @@ class AddCharacterWindow:
         hoja = self._es_hoja()
         ruta = (self.var_retrato.get() or self.var_hoja.get()) if hoja else self.var_imagen.get()
         pendiente = self._pendiente()
-        self.vista.actualizar(self.entry_nombre.get(), self.entry_serie.get(), hoja and not self.var_retrato.get(), ruta, pendiente)
+        self.vista.actualizar(self.entry_nombre.get(), self.entry_serie.get(), hoja and not self.var_retrato.get(), ruta, pendiente,
+                            hasattr(self, "text_pers") and not self._sugerencia and bool(self.text_pers.get("1.0", "end-1c").strip()))
         if pendiente:
             self.btn_crear.configure(fg_color=theme.SURFACE_SELECTED, hover_color=theme.SURFACE_SELECTED, text_color=theme.TEXT_FAINT)
         else:

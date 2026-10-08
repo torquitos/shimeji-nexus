@@ -1,3 +1,7 @@
+# Shimeji Nexus (primera versión)
+
+> Este es el README original del proyecto, antes del rediseño. El actual está en [README.md](../README.md).
+
 # Shimeji Nexus - Mascotas de escritorio con IA
 
 Aplicación de mascotas interactivas en el escritorio con inteligencia artificial. Las mascotas pueden caminar, saludar, interactuar entre sí y mantener conversaciones usando Gemini, OpenAI u OpenRouter.
@@ -6,7 +10,7 @@ Aplicación de mascotas interactivas en el escritorio con inteligencia artificia
 
 | Gojo Satoru | Rias Gremory | Naruto Uzumaki |
 |:-----------:|:------------:|:---------------:|
-| ![Gojo](assets/gojo_card.png) | ![Rias](assets/rias_card.png) | ![Naruto](assets/naruto_card.png) |
+| ![Gojo](../assets/gojo_card.png) | ![Rias](../assets/rias_card.png) | ![Naruto](../assets/naruto_card.png) |
 
 ## Requisitos
 
@@ -52,7 +56,7 @@ Se abre un launcher con la lista de personajes disponibles. Seleccioná uno y pr
 
 | Launcher | Mascota en pantalla |
 |----------|---------------------|
-| ![Launcher](assets/launcher.png) | ![Mascota](assets/mascotas.png) |
+| ![Launcher](../assets/launcher.png) | ![Mascota](../assets/mascotas.png) |
 
 ## Controles
 

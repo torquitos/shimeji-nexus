@@ -6,7 +6,7 @@ from shimeji_nexus.ui.formas import contorno_redondeado
 TEXTO_W = 290
 MARGEN = 36
 ALTO_MIN = 92
-TIPOS = {"orbitar": "ORBES", "brasas": "ONDA", "espiral": "ESFERA", "rayo": "RAYO"}
+TIPOS = {"orbitar": "ORBES", "brasas": "ONDA", "espiral": "ESFERA", "rayo": "RAYO", "zoomies": "CARRERA"}
 
 
 class TarjetaHabilidadMixin:

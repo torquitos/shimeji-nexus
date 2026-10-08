@@ -2,13 +2,14 @@ import json
 import os
 import subprocess
 import sys
-import threading
 from tkinter import messagebox
 
 from PIL import Image
 
 from shimeji_nexus.audio import sound_manager
+from shimeji_nexus.core import papelera
 from shimeji_nexus.core import settings as settings_manager
+from shimeji_nexus.core import sistema
 from shimeji_nexus.core.paths import base_dir
 
 
@@ -31,6 +32,17 @@ class ProcesosMixin:
             self._lanzar(nombre)
         if self.personaje_seleccionado:
             self.seleccionar_personaje(self.personaje_seleccionado)
+
+    def _vigilar_atajo(self, antes=False):
+        """Ctrl + Mayus + N invoca a todas, tenga o no el foco el launcher."""
+        try:
+            self._atender_bandeja()
+            ahora = sistema.atajo_pulsado()
+            if ahora and not antes:
+                self.lanzar_todas()
+            self.root.after(120, lambda: self._vigilar_atajo(ahora))
+        except Exception:
+            pass
 
     def _vigilar_procesos(self):
         """Si una mascota se cierra por su cuenta (menu 'Cerrar mascota'), el launcher se entera."""
@@ -78,6 +90,23 @@ class ProcesosMixin:
             messagebox.showerror("Error", f"No se pudo invocar a {item}:\n{e}")
             return False
 
+    def eliminar_personaje(self):
+        nombre = self.personaje_seleccionado
+        if not nombre:
+            return
+        info = self.personajes_datos[nombre]
+        if not messagebox.askyesno("Eliminar personaje", f"¿Quitar a {info['nombre']} de tu lista?\n\nSu carpeta se mueve a 'papelera' y se borra lo que hablaron. "
+                                   "Puedes devolverla a mano.", icon="warning", parent=self.root):
+            return
+        self.cerrar_por_nombre(nombre)
+        try:
+            papelera.eliminar(info["folder"], info["nombre"])
+        except OSError as e:
+            messagebox.showwarning("No se pudo eliminar", str(e), parent=self.root)
+            return
+        self.personaje_seleccionado = None
+        self.escanear_personajes()
+
     def cerrar_mascota_seleccionada(self):
         if not self.personaje_seleccionado:
             return
@@ -105,36 +134,49 @@ class ProcesosMixin:
         if self.personaje_seleccionado == nombre:
             self.seleccionar_personaje(nombre)
 
-    def matar_todos(self):
+    def matar_todos(self, avisar=True):
         for nombre in list(self.mascotas_activas.keys()):
             self.cerrar_por_nombre(nombre)
         sound_manager.reproducir("close")
-        messagebox.showinfo("Limpieza", "Todas las mascotas cerradas.")
+        if avisar:
+            messagebox.showinfo("Limpieza", "Todas las mascotas cerradas.")
         if self.personaje_seleccionado:
             self.seleccionar_personaje(self.personaje_seleccionado)
 
     def iniciar_tray_icon(self):
+        """El icono de la bandeja vive desde que abre la app: cerrar la ventana solo la esconde y las
+        mascotas siguen. Los clics del icono llegan desde otro hilo, asi que pasan por una cola."""
         try:
             import pystray
             from pystray import MenuItem as Item
 
             img_tray = Image.open(os.path.join(base_dir(), "app_icon.ico")).resize((64, 64))
-            icono = pystray.Icon("shimeji", img_tray, "Shimeji Nexus", menu=pystray.Menu(
-                Item("Mostrar Ventana", lambda: self.root.after(0, self.root.deiconify)),
-                Item("Salir", lambda: self.root.after(0, self.salir_completo)),
+            self._tray_icon = pystray.Icon("shimeji", img_tray, "Shimeji Nexus", menu=pystray.Menu(
+                Item("Abrir Shimeji Nexus", lambda: self._cola_tray.put("mostrar"), default=True),
+                Item("Invocar a todas", lambda: self._cola_tray.put("invocar")),
+                Item("Cerrar todas las mascotas", lambda: self._cola_tray.put("cerrar")),
+                Item("Salir", lambda: self._cola_tray.put("salir")),
             ))
-
-            def minimizar():
-                self.root.withdraw()
-                threading.Thread(target=icono.run, daemon=True).start()
-
-            self.root.protocol("WM_DELETE_WINDOW", minimizar)
-            self._tray_icon = icono
+            self._tray_icon.run_detached()
+            self.root.protocol("WM_DELETE_WINDOW", self.root.withdraw)
         except ImportError:
-            pass
+            self.root.protocol("WM_DELETE_WINDOW", self.root.iconify)
+
+    def _atender_bandeja(self):
+        while not self._cola_tray.empty():
+            orden = self._cola_tray.get_nowait()
+            if orden == "mostrar":
+                self.root.deiconify()
+                self.root.lift()
+            elif orden == "invocar":
+                self.lanzar_todas()
+            elif orden == "cerrar":
+                self.matar_todos(avisar=False)
+            elif orden == "salir":
+                self.salir_completo()
 
     def salir_completo(self):
-        self.matar_todos()
+        self.matar_todos(avisar=False)
         try:
             self._tray_icon.stop()
         except Exception:

@@ -25,9 +25,6 @@ class IAPanel:
         self.lbl_guardada = ctk.CTkLabel(card, text="", font=theme.FONT_CAPTION, anchor="w", corner_radius=6, padx=8, pady=2)
         self.lbl_guardada.pack(anchor="w", padx=16, pady=(0, 14))
         self._construir_clave(seccion(parent, "Clave de API"))
-        ctk.CTkLabel(parent, text="Tu clave se queda en este equipo y solo se envía al proveedor que elijas. "
-                                  "Se aplica a las mascotas que invoques después de guardar.",
-                     font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM, anchor="w", justify="left", wraplength=470).pack(anchor="w", pady=(12, 8))
         self._al_cambiar_proveedor()
 
     def _construir_clave(self, card):
@@ -44,7 +41,10 @@ class IAPanel:
         self.btn_probar.pack(side="left")
         boton_secundario(botones, "Conseguir clave", self._abrir_pagina, 140).pack(side="left", padx=(8, 0))
         self.lbl_resultado = ctk.CTkLabel(card, text="", font=theme.FONT_BODY, anchor="w", justify="left", wraplength=440)
-        self.lbl_resultado.pack(anchor="w", padx=16, pady=(10, 16))
+        self._nota = ctk.CTkLabel(card, text="Tu clave se queda en este equipo y solo se envía al proveedor que elijas. "
+                                             "Se aplica a las mascotas que invoques después de guardar.",
+                                  font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM, anchor="w", justify="left", wraplength=440)
+        self._nota.pack(anchor="w", padx=16, pady=(12, 16))
 
     def _alternar_ver(self):
         oculta = self.entry_clave.cget("show") != ""
@@ -65,7 +65,7 @@ class IAPanel:
             self.lbl_guardada.configure(text="Sin clave guardada", text_color=theme.TEXT_DIM, fg_color=theme.SURFACE_SELECTED)
         self.entry_clave.delete(0, "end")
         self.entry_clave.configure(placeholder_text="Pega una clave nueva para reemplazar la actual" if guardada else "Pega aquí tu clave de API")
-        self.lbl_resultado.configure(text="")
+        self.lbl_resultado.pack_forget()
 
     def _abrir_pagina(self):
         webbrowser.open(ia.PROVEEDORES[self._proveedor()][2])
@@ -74,10 +74,10 @@ class IAPanel:
         proveedor = self._proveedor()
         clave = self.entry_clave.get().strip().strip("'\"") or self._clave_guardada(proveedor)
         if not clave:
-            self.lbl_resultado.configure(text="Escribe o pega una clave primero.", text_color=theme.DANGER)
+            self._decir("Escribe o pega una clave primero.", theme.DANGER)
             return
         self.btn_probar.configure(state="disabled", text="Probando…")
-        self.lbl_resultado.configure(text="", text_color=theme.TEXT_DIM)
+        self.lbl_resultado.pack_forget()
 
         def trabajo():
             ok, mensaje = ia.probar_clave(proveedor, clave)
@@ -90,7 +90,11 @@ class IAPanel:
 
     def _mostrar_resultado(self, ok, mensaje):
         self.btn_probar.configure(state="normal", text="Probar conexión")
-        self.lbl_resultado.configure(text=("✓  " if ok else "✕  ") + mensaje, text_color=theme.SUCCESS if ok else theme.DANGER)
+        self._decir(("✓  " if ok else "✕  ") + mensaje, theme.SUCCESS if ok else theme.DANGER)
+
+    def _decir(self, texto, color):
+        self.lbl_resultado.configure(text=texto, text_color=color)
+        self.lbl_resultado.pack(anchor="w", padx=16, pady=(10, 0), before=self._nota)
 
     def guardar(self):
         proveedor = self._proveedor()

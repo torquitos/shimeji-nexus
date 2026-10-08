@@ -10,6 +10,8 @@ from PIL import ImageTk
 from shimeji_nexus.ai import client as ai_manager
 from shimeji_nexus.audio import sound_manager
 from shimeji_nexus.core import image_utils, pantallas
+from shimeji_nexus.core import settings as settings_manager
+from shimeji_nexus.core.memoria import Memoria
 from shimeji_nexus.ui import theme
 from shimeji_nexus.ui.formas import contorno_redondeado as _contorno_redondeado
 
@@ -59,6 +61,7 @@ class ChatBubble:
         self.acento = theme.acento_desde_color_texto(color) if color else theme.ACCENT_DEFAULT
         self.fondo = theme.blend_color(self.acento, "#0b0b0f", 0.16)
         self.nombre = (config.get("nombre") or "").split()[0] if config.get("nombre") else ""
+        self.memoria = Memoria(config.get("nombre") or "personaje")
         self.avatar = self._cargar_avatar(ruta)
 
         self.globo = tk.Toplevel(window)
@@ -238,7 +241,9 @@ class ChatBubble:
 
     def _procesar_conversacion_ia(self, mensaje_usuario):
         try:
-            texto = ai_manager.generar_texto(self.config["personalidad"], mensaje_usuario, 12)
+            texto = ai_manager.generar_texto(self.config["personalidad"], mensaje_usuario, 14, self.memoria.contexto())
+            if not texto.startswith(("Error", "Falta tu clave", "Proveedor")):
+                self.memoria.recordar(mensaje_usuario, texto)
         except Exception as e:
             print(f"Error en IA: {e}")
             texto = "Error..."
@@ -249,8 +254,9 @@ class ChatBubble:
 
     def _bucle_monitoreo_ia(self):
         while True:
-            time.sleep(30)
-            if not self.chat_abierto:
+            time.sleep(150)
+            ajustes = settings_manager.cargar()
+            if not self.chat_abierto and ajustes.get("monitoreo_ia", True) and not ajustes.get("concentracion") and self.config.get("habla", True):
                 try:
                     v = gw.getActiveWindow()
                     ventana = v.title if v else "Escritorio"

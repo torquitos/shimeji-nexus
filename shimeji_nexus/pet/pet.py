@@ -16,6 +16,7 @@ from shimeji_nexus.pet.comandos import ComandosMixin
 from shimeji_nexus.pet.habilidades import EfectoHabilidad, cargar_habilidad
 from shimeji_nexus.pet.movimiento import MovimientoMixin
 from shimeji_nexus.pet.physics import PhysicsEngine
+from shimeji_nexus.pet.reaccionar import ReaccionarMixin
 from shimeji_nexus.pet.social import SocialBehavior
 
 try:
@@ -25,7 +26,7 @@ except Exception:
     pass
 
 
-class MascotaLogica(MovimientoMixin, ComandosMixin, AccionesMixin):
+class MascotaLogica(MovimientoMixin, ComandosMixin, AccionesMixin, ReaccionarMixin):
     SHARED_DIR = os.path.join(base_dir(), "shared_state")
 
     def __init__(self, ruta_personaje, pos_inicial=None, args=None):
@@ -76,13 +77,15 @@ class MascotaLogica(MovimientoMixin, ComandosMixin, AccionesMixin):
 
         # Menú contextual
         self.menu = tk.Menu(self.window, tearoff=0, bg="#16161D", fg="white", activebackground="#FF3366")
-        self.menu.add_command(label="Abrir/Ocultar Chat", command=self._conmutar_chat)
+        if self.config.get("habla", True):
+            self.menu.add_command(label="Abrir/Ocultar Chat", command=self._conmutar_chat)
         self.menu.add_command(label=f"Usar {self.habilidad['nombre']}", command=self.accion_magica)
         self.menu.add_separator()
         self.menu.add_command(label="Iniciar pomodoro", command=lambda: self.chat.avisar(self._comando("/pomodoro")))
         self.menu.add_command(label="Detener pomodoro", command=lambda: self.chat.avisar(self._comando("/parar")))
         self.menu.add_separator()
         self.menu.add_command(label="Cerrar Mascota", command=self.salir)
+        self.menu.add_command(label="Cerrar todas", command=self.cerrar_todas)
 
         self.fisica = PhysicsEngine(self.tamano)
         if pos_inicial and isinstance(pos_inicial, (list, tuple)) and len(pos_inicial) == 2:
@@ -113,8 +116,8 @@ class MascotaLogica(MovimientoMixin, ComandosMixin, AccionesMixin):
         self.pasos_restantes = 0
 
         self.actualizar_motor()
-        if self.args.get("monitoreo_ia", True):
-            self.chat.iniciar_monitoreo_ia()
+        self.chat.iniciar_monitoreo_ia()
+        self.iniciar_reacciones()
         self.window.mainloop()
 
     def _retrato(self):
@@ -127,6 +130,8 @@ class MascotaLogica(MovimientoMixin, ComandosMixin, AccionesMixin):
         self.estado = "quieto"
 
     def _conmutar_chat(self):
+        if not self.config.get("habla", True):
+            return
         self.chat.conmutar()
         if self.chat.chat_abierto:
             self.estado = "quieto"

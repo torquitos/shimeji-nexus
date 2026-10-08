@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageTk
 
 from shimeji_nexus.ui import theme
 
-ANCHO = 512
+ANCHO = 440
 ALTO = 56
 HALO = 14
 RADIO = 16

@@ -86,6 +86,50 @@
         "reaccion_habilidad": [
             "¡Increíble, {nombre}! ¡Yo también puedo hacer eso, dattebayo!",
             "¡Guau, qué técnica, {nombre}!"
+        ],
+        "reac_codigo": [
+            "¡Eso es, dattebayo! ¡Sigue así!",
+            "¿Código? Yo mejor entreno, pero tú dale."
+        ],
+        "reac_video": [
+            "¡Quiero ver también! ¿Qué es?",
+            "Videos, ¿eh? ¡Yo prefiero ramen!"
+        ],
+        "reac_juego": [
+            "¡Juguemos juntos! ¡Yo quiero ganar!",
+            "¡Dale con todo, nunca te rindas!"
+        ],
+        "reac_chat": [
+            "¡Saluda a mis amigos de mi parte!",
+            "¿Con quién hablas? ¡Cuéntame!"
+        ],
+        "reac_doc": [
+            "Uf, mucho papeleo, ¡ánimo!",
+            "¡Tú puedes con eso, no te rindas!"
+        ],
+        "reac_musica": [
+            "¡Qué buena música, sube el volumen!",
+            "¡Eso me da ganas de entrenar!"
+        ],
+        "reac_redes": [
+            "¿Otra vez en las redes? ¡A trabajar!",
+            "Mucho scroll... ¡mejor vamos a entrenar!"
+        ],
+        "idle": [
+            "¿Dónde te metiste? ¡Me aburro!",
+            "Voy a practicar mientras vuelves..."
+        ],
+        "vuelve": [
+            "¡Volviste! ¡Qué alegría, dattebayo!",
+            "¡Al fin! ¡Ya te estaba esperando!"
+        ],
+        "tarde": [
+            "¡Es muy tarde! ¡Hasta yo me voy a dormir!",
+            "¡A dormir ya, mañana será otro día!"
+        ],
+        "descanso": [
+            "¡Llevas horas sentado! ¡Haz ejercicio!",
+            "¡Una pausa, y luego seguimos con todo!"
         ]
     },
     "habilidad": {

@@ -100,9 +100,8 @@ class SocialBehavior:
                     cambios["siguiendo_a"] = v.get("nombre")
                     cambios["seguir_restantes"] = random.randint(40, 100)
                 else:
-                    cambios["estado"] = "flotando"
+                    cambios["estado"] = "caminando"
                     cambios["pasos_restantes"] = 40
-                    mostrar_comentario(self.voz.decir("volar"))
                 cambios["tick_interaccion"] = 0
             elif dist < 140 and estado == "quieto" and tick_interaccion > 90 and v.get("estado") == "caminando":
                 if random.random() < 0.15:
