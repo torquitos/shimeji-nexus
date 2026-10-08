@@ -41,6 +41,7 @@ def escanear(ruta_personajes, on_carpeta=None):
             "imagen": data.get("imagen", "rias.png"),
             "serie": serie, "bio": bio,
             "saludo": data.get("saludo", ""),
+            "fuente": (data.get("chat") or {}).get("fuente", ""),
             "habilidad": cargar_habilidad(data),
             "color_globo": data.get("color_globo"),
             "color_texto": color_texto_raw,

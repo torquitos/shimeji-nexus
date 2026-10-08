@@ -2,16 +2,25 @@
 
 # ---- Paleta base ----
 BG = "#0b0b0f"
-PANEL = "#12121a"
+PANEL = "#101016"
 CARD = "#171720"
 CARD_HOVER = "#1d1d28"
 BORDER = "#26262f"
 BORDER_SOFT = "#1e1e27"
 TEXT = "#eeeef2"
 TEXT_SOFT = "#b8b8c6"
-TEXT_DIM = "#9494a3"
+TEXT_DIM = "#a0a0b0"
 TEXT_FAINT = "#5c5c6b"
 SUCCESS = "#4caf7d"
+
+# Superficies y cromo de las ventanas de la app (Ajustes, Nuevo personaje). El color del personaje
+# solo vive en la portada; el resto usa este acento de marca.
+SURFACE = "#14141b"
+SURFACE_SELECTED = "#1a1a24"
+FIELD = "#0d0d12"
+DIVIDER = "#1c1c25"
+TRACK = "#23232e"
+ACCENT_BRAND = "#7c8cff"
 DANGER = "#e0546e"
 
 # Acento por defecto para personajes sin color_globo/color_texto propio
@@ -47,7 +56,9 @@ FONT_BODY = (FONT_FAMILY, 12)
 FONT_BODY_LARGE = (FONT_FAMILY, 13)
 FONT_BODY_MEDIUM = (FONT_FAMILY, 12, "bold")
 FONT_BUTTON = (FONT_FAMILY_SEMIBOLD, 16)
-FONT_CAPTION = (FONT_FAMILY, 10)
+FONT_CAPTION = (FONT_FAMILY, 11)
+FONT_SECTION = (FONT_FAMILY_SEMIBOLD, 13)
+FONT_ROW = (FONT_FAMILY_SEMIBOLD, 12)
 FONT_CAPTION_BOLD = (FONT_FAMILY, 10, "bold")
 
 # ---- Espaciado ----

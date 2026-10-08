@@ -51,11 +51,12 @@ class VidaMixin:
         c = self.canvas_hero
         for p in self._ambiente:
             c.delete(p["id"])
-        x0, y0, x1, y1 = self._spr_caja
+        x0, y0, x1, y1 = preview.ESCENARIO
+        y0, y1 = y0 + 20, y1 - 30
         colores = [info["color_acento"]] + info["habilidad"]["colores"][:2]
         self._ambiente = []
         for _ in range(AMBIENTE):
-            p = {"x": random.uniform(x0 - 40, x1 + 40), "y": random.uniform(y0, y1), "vy": random.uniform(0.25, 0.9),
+            p = {"x": random.uniform(x0 + 14, x1 - 14), "y": random.uniform(y0, y1), "vy": random.uniform(0.25, 0.9),
                  "r": random.uniform(1.6, 3.6), "fase": random.uniform(0, 6.28), "col": random.choice(colores)}
             p["id"] = c.create_oval(0, 0, 0, 0, outline="")
             c.tag_lower(p["id"], self._hero_sprite)
@@ -84,12 +85,13 @@ class VidaMixin:
 
     def _mover_ambiente(self):
         c = self.canvas_hero
-        x0, y0, x1, y1 = self._spr_caja
+        x0, y0, x1, y1 = preview.ESCENARIO
+        y0, y1 = y0 + 20, y1 - 30
         for p in self._ambiente:
             p["y"] -= p["vy"]
             if p["y"] < y0 - 20:
-                p["y"], p["x"] = y1 - random.uniform(0, 60), random.uniform(x0 - 40, x1 + 40)
-            x = p["x"] + 10 * math.sin(self._t * 0.04 + p["fase"])
+                p["y"], p["x"] = y1 - random.uniform(0, 60), random.uniform(x0 + 14, x1 - 14)
+            x = min(x1 - 8, max(x0 + 8, p["x"] + 10 * math.sin(self._t * 0.04 + p["fase"])))
             brillo = max(0.0, min(1.0, (p["y"] - y0 + 20) / (y1 - y0 + 20)))
             c.coords(p["id"], x - p["r"], p["y"] - p["r"], x + p["r"], p["y"] + p["r"])
             c.itemconfig(p["id"], fill=theme.blend_color(p["col"], theme.BG, 0.15 + 0.75 * brillo))

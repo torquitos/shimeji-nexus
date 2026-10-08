@@ -28,8 +28,8 @@ class SidebarMixin:
             ctk.CTkLabel(header, text="", image=logo).pack(side="left", padx=(0, 12))
         col = ctk.CTkFrame(header, fg_color="transparent")
         col.pack(side="left")
-        ctk.CTkLabel(col, text="SHIMEJI NEXUS", font=theme.FONT_HEADING, text_color=theme.TEXT, anchor="w").pack(anchor="w")
-        self.lbl_contador = ctk.CTkLabel(col, text="Personajes", font=theme.FONT_CAPTION, text_color=theme.TEXT_FAINT, anchor="w")
+        ctk.CTkLabel(col, text="Shimeji Nexus", font=theme.FONT_SECTION, text_color=theme.TEXT, anchor="w").pack(anchor="w")
+        self.lbl_contador = ctk.CTkLabel(col, text="Personajes", font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM, anchor="w")
         self.lbl_contador.pack(anchor="w")
 
         self.frame_cards = ctk.CTkScrollableFrame(
@@ -37,18 +37,26 @@ class SidebarMixin:
             scrollbar_button_color=theme.PANEL, scrollbar_button_hover_color=theme.BORDER)
         self.frame_cards.pack(fill="both", expand=True, padx=(14, 8))
 
+        fila = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        fila.pack(fill="x", padx=22, pady=(6, 0))
+        self._punto = ctk.CTkLabel(fila, text="●", font=("Segoe UI", 10), text_color=theme.TEXT_FAINT, width=14)
+        self._punto.pack(side="left")
+        self.lbl_activas = ctk.CTkLabel(fila, text="", font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM)
+        self.lbl_activas.pack(side="left", padx=(6, 0))
+        self._btn_todas = ctk.CTkButton(
+            fila, text="Invocar a todas", width=96, height=24, command=self.lanzar_todas, fg_color="transparent", hover_color=theme.SURFACE,
+            text_color=theme.ACCENT_BRAND, font=theme.FONT_CAPTION_BOLD, corner_radius=8)
+        self._btn_todas.pack(side="right")
+
         sidebar_footer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
         sidebar_footer.pack(fill="x", padx=18, pady=18)
         ctk.CTkButton(
-            sidebar_footer, text="\u2699", width=44, height=44, command=self.abrir_settings,
-            fg_color="transparent", hover_color=theme.CARD, text_color=theme.TEXT_DIM,
-            border_width=1, border_color=theme.BORDER, corner_radius=12, font=theme.FONT_BODY_LARGE,
+            sidebar_footer, text="\u2699", width=40, height=40, command=self.abrir_settings, fg_color=theme.SURFACE_SELECTED,
+            hover_color=theme.TRACK, text_color=theme.TEXT_SOFT, corner_radius=8, font=theme.FONT_BODY_LARGE,
         ).pack(side="right", padx=(8, 0))
         self._btn_agregar_personaje = ctk.CTkButton(
-            sidebar_footer, text="+  Agregar personaje", command=self.abrir_agregar,
-            fg_color="transparent", hover_color=theme.CARD, text_color=theme.TEXT_DIM,
-            border_width=1, border_color=theme.BORDER, corner_radius=12,
-            font=theme.FONT_BODY_MEDIUM, height=44,
+            sidebar_footer, text="+  Agregar personaje", command=self.abrir_agregar, fg_color=theme.SURFACE_SELECTED,
+            hover_color=theme.TRACK, text_color=theme.TEXT_SOFT, corner_radius=8, font=theme.FONT_ROW, height=40,
         )
         self._btn_agregar_personaje.pack(side="left", fill="x", expand=True)
 
@@ -59,14 +67,15 @@ class SidebarMixin:
         return ctk.CTkImage(Image.open(ruta), size=(34, 34))
 
     def _crear_card(self, parent, nombre, thumb, color_acento, color_acento_soft):
-        card = ctk.CTkFrame(parent, fg_color=theme.CARD, corner_radius=14, border_width=1, border_color=theme.BORDER_SOFT, height=78)
+        card = ctk.CTkFrame(parent, fg_color=theme.PANEL, corner_radius=10, border_width=0, height=76)
         card.pack(fill="x", pady=4)
         card.pack_propagate(False)
 
         barra = ctk.CTkFrame(card, fg_color=color_acento, width=4, corner_radius=2)
         barra.place(x=8, rely=0.2, relheight=0.6)
 
-        holder = ctk.CTkFrame(card, fg_color=color_acento_soft, corner_radius=12, width=58, height=58)
+        holder = ctk.CTkFrame(card, fg_color=color_acento_soft, corner_radius=12, width=58, height=58,
+                          border_width=1, border_color=theme.blend_color(color_acento, theme.PANEL, 0.3))
         holder.place(x=22, rely=0.5, anchor="w")
         if thumb is not None:
             thumb_label = tk.Label(holder, image=thumb, bg=color_acento_soft, bd=0)
@@ -75,26 +84,30 @@ class SidebarMixin:
             thumb_label = ctk.CTkLabel(holder, text="?", font=theme.FONT_BODY, text_color=theme.TEXT_FAINT)
         thumb_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        lbl = ctk.CTkLabel(card, text=nombre, font=theme.FONT_BODY_LARGE, text_color=theme.TEXT, anchor="w")
+        lbl = ctk.CTkLabel(card, text=nombre, font=theme.FONT_SECTION, text_color=theme.TEXT, anchor="w")
         lbl.place(x=92, rely=0.36, anchor="w")
         estado = ctk.CTkLabel(card, text="", font=theme.FONT_CAPTION, text_color=theme.TEXT_DIM, anchor="w")
         estado.place(x=92, rely=0.68, anchor="w")
 
         def entrar(_e, n=nombre):
             if n != self.personaje_seleccionado:
-                card.configure(fg_color=theme.CARD_HOVER)
+                card.configure(fg_color=theme.SURFACE)
 
         def salir(e, n=nombre):
             bajo = self.root.winfo_containing(e.x_root, e.y_root)
             if bajo is not None and str(bajo).startswith(str(card)):
                 return
             if n != self.personaje_seleccionado:
-                card.configure(fg_color=theme.CARD)
+                card.configure(fg_color=theme.PANEL)
 
         for widget in (card, barra, holder, thumb_label, lbl, estado):
             widget.bind("<Button-1>", lambda e, n=nombre: self.seleccionar_personaje(n))
             widget.bind("<Enter>", entrar)
             widget.bind("<Leave>", salir)
+            try:
+                widget.configure(cursor="hand2")
+            except Exception:
+                pass
         return card, estado
 
     def escanear_personajes(self):
@@ -105,6 +118,7 @@ class SidebarMixin:
         self.cards.clear()
         self.card_thumbs.clear()
         self._sprites.clear()
+        self._fondos.clear()
         ruta = os.path.join(base_dir(), "personajes")
         self.personajes_datos = characters.escanear(ruta, on_carpeta=lambda c: debug_log(f"DEBUG: Procesando {c}..."))
         debug_log(f"DEBUG: Carpetas encontradas = {sorted(os.listdir(ruta))}")
@@ -136,3 +150,12 @@ class SidebarMixin:
                 c["estado"].configure(text="\u25cf  En pantalla", text_color=theme.SUCCESS)
             else:
                 c["estado"].configure(text=self.personajes_datos[nombre]["serie"] or "Disponible", text_color=theme.TEXT_DIM)
+        self._actualizar_franja()
+
+    def _actualizar_franja(self):
+        n, total = len(self.mascotas_activas), len(self.personajes_datos)
+        self._punto.configure(text_color=theme.SUCCESS if n else theme.TEXT_FAINT)
+        self.lbl_activas.configure(text=f"{n} en pantalla" if n else "Ninguna en pantalla")
+        todas = n == total and total > 0
+        self._btn_todas.configure(text="Cerrar todas" if todas else "Invocar a todas", command=self.matar_todos if todas else self.lanzar_todas)
+        self._btn_todas.pack(side="right")

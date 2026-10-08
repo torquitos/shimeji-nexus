@@ -9,14 +9,14 @@ from shimeji_nexus.core.paths import base_dir
 from shimeji_nexus.ui import theme
 from shimeji_nexus.ui.launcher.registro import debug_log
 
-from shimeji_nexus.ui.add_character_window import AddCharacterWindow
+from shimeji_nexus.ui.nuevo_personaje import AddCharacterWindow
 from shimeji_nexus.ui.launcher.hero import HeroMixin
 from shimeji_nexus.ui.launcher.procesos import ProcesosMixin
 from shimeji_nexus.ui.launcher.sidebar import SidebarMixin
 from shimeji_nexus.ui.launcher.tarjeta import TarjetaHabilidadMixin
 from shimeji_nexus.ui.launcher.tecnica import TecnicaMixin
 from shimeji_nexus.ui.launcher.vida import VidaMixin
-from shimeji_nexus.ui.settings_window import SettingsWindow
+from shimeji_nexus.ui.ajustes import SettingsWindow
 
 ctk.set_appearance_mode("dark")
 
@@ -30,6 +30,7 @@ class LauncherPremiumAnime(SidebarMixin, HeroMixin, TarjetaHabilidadMixin, Tecni
         self.card_thumbs = {}
         self.hero_photo = None
         self._sprites = {}
+        self._fondos = {}
 
         self.root = ctk.CTk()
         self.root.title("SHIMEJI NEXUS - MULTI-AGENT HUB")
@@ -78,6 +79,7 @@ class LauncherPremiumAnime(SidebarMixin, HeroMixin, TarjetaHabilidadMixin, Tecni
         self._build_sidebar()
         self._build_main()
         self._iniciar_vida()
+        self.root.after(2000, self._vigilar_procesos)
 
     def abrir_agregar(self):
         AddCharacterWindow(self.root, self)

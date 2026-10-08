@@ -17,15 +17,36 @@ class ProcesosMixin:
     """Lanzar y cerrar los procesos de las mascotas, bandeja del sistema y salida de la app."""
 
     def lanzar(self):
-        if not self.personaje_seleccionado:
-            return
         item = self.personaje_seleccionado
-        info = self.personajes_datos[item]
-
+        if not item:
+            return
         if item in self.mascotas_activas:
             messagebox.showinfo("Ya activa", f"{item} ya está en pantalla.")
             return
+        if self._lanzar(item):
+            self.seleccionar_personaje(item)
 
+    def lanzar_todas(self):
+        for nombre in [n for n in self.personajes_datos if n not in self.mascotas_activas]:
+            self._lanzar(nombre)
+        if self.personaje_seleccionado:
+            self.seleccionar_personaje(self.personaje_seleccionado)
+
+    def _vigilar_procesos(self):
+        """Si una mascota se cierra por su cuenta (menu 'Cerrar mascota'), el launcher se entera."""
+        try:
+            cerradas = [n for n, i in self.mascotas_activas.items() if i["proceso"].poll() is not None]
+            for nombre in cerradas:
+                del self.mascotas_activas[nombre]
+            if cerradas and self.personaje_seleccionado:
+                self.seleccionar_personaje(self.personaje_seleccionado)
+            self.actualizar_estados()
+            self.root.after(2000, self._vigilar_procesos)
+        except Exception:
+            pass
+
+    def _lanzar(self, item):
+        info = self.personajes_datos[item]
         folder = info["folder"]
         ruta_envio = os.path.join(base_dir(), "personajes", folder)
         sound_manager.reproducir("invoke")
@@ -52,9 +73,10 @@ class ProcesosMixin:
         try:
             proc = subprocess.Popen(args)
             self.mascotas_activas[item] = {"proceso": proc, "folder": folder}
-            self.seleccionar_personaje(item)
+            return True
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo invocar a {item}:\n{e}")
+            return False
 
     def cerrar_mascota_seleccionada(self):
         if not self.personaje_seleccionado:

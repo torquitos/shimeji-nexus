@@ -104,7 +104,9 @@ Mascotas/
 │   │   └── habilidades/      #   config, util, lienzo, aura, formas (efectos), efecto
 │   ├── ui/                   # ventanas de la app
 │   │   ├── launcher/         #   app, sidebar, hero, procesos
-│   │   └── settings_window.py / add_character_window.py / preview.py / theme.py
+│   │   ├── ajustes/          #   ventana de Ajustes con navegación lateral (General, Productividad, IA)
+│   │   ├── nuevo_personaje/  #   crear personaje con vista previa; imagen suelta u hoja de sprites
+│   │   └── preview.py / theme.py / formas.py
 │   └── ipc/                  # estado compartido entre mascotas
 ├── requirements.txt         # Dependencias
 ├── herramientas/             # preparar_sprites.py: hoja de sprites -> frames del personaje
